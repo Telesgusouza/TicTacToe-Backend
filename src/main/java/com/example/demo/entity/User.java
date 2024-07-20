@@ -1,18 +1,30 @@
 package com.example.demo.entity;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.demo.enums.UserRole;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 
-public class User {
+@Table(name = "tb_users")
+@Entity(name = "tb_users")
+public class User implements UserDetails {
+	private static final long serialVersionUID = -2378536838878240518L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,4 +40,88 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
 
+	public User() {
+	}
+
+	public User(UUID id, @Email String login, String password, UserRole role) {
+		super();
+		this.id = id;
+		this.login = login;
+		this.password = password;
+		this.role = role;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		if (this.role == UserRole.OUT_OF_START)
+			return Arrays.asList(new SimpleGrantedAuthority("ROLE_OUT_OF_START"));
+
+		else if (this.role == UserRole.LOOKING_FOR_MATCH)
+			return Arrays.asList(new SimpleGrantedAuthority("ROLE_LOOKING_FOR_MATCH"));
+
+		else if (this.role == UserRole.ON_DEPARTURE)
+			return Arrays.asList(new SimpleGrantedAuthority("ROLE_ON_DEPARTURE"));
+
+		return Arrays.asList(new SimpleGrantedAuthority("ROLE_OUT_OF_START"));
+	}
+
+	@Override
+	public String getPassword() {
+		return this.password;
+	}
+
+	@Override
+	public String getUsername() {
+		return this.login;
+	}
+
+	public UUID getId() {
+		return id;
+	}
+
+	public void setId(UUID id) {
+		this.id = id;
+	}
+
+	public String getLogin() {
+		return login;
+	}
+
+	public void setLogin(String login) {
+		this.login = login;
+	}
+
+	public UserRole getRole() {
+		return role;
+	}
+
+	public void setRole(UserRole role) {
+		this.role = role;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", login=" + login + ", password=" + password + ", role=" + role + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		User other = (User) obj;
+		return Objects.equals(id, other.id);
+	}
 }
