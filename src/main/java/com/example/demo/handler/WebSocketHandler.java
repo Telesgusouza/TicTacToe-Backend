@@ -1,6 +1,9 @@
 package com.example.demo.handler;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -11,21 +14,33 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
+
+	private Map<String, WebSocketSession> sessions;
+
+	public WebSocketHandler() {
+		sessions = new ConcurrentHashMap<>();
+	}
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 
 		System.out.println("[afterConnectionEstablished] session id " + session.getId());
 
+		Optional<String> uriServer = Optional.ofNullable(session.getUri()).map(UriComponentsBuilder::fromUri)
+				.map(UriComponentsBuilder::build).map(UriComponents::getQueryParams).map(it -> it.get("server"))
+				.flatMap(it -> it.stream().findFirst()).map(String::trim);
+
+		sessions.put(uriServer.toString(), session);
+
 	}
 
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-
-		System.out.println("[handleMessage] session id " + message.getPayload());
 
 		String payload = (String) message.getPayload();
 
@@ -45,7 +60,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			// Fechar o executorService após a execução da tarefa
 			executorService.shutdown();
 
-			System.out.println("Enviado pong em resposta ao ping");
 		}
 
 	}

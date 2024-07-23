@@ -9,8 +9,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.example.demo.enums.Player;
 import com.example.demo.enums.UserRole;
 
+import ch.qos.logback.core.joran.spi.EventPlayer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -39,16 +41,20 @@ public class User implements UserDetails {
 
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
+	
+	@Enumerated(EnumType.STRING)
+	private Player player = Player.PLAYER_ONE;
 
 	public User() {
 	}
 
-	public User(UUID id, @Email String login, String password, UserRole role) {
+	public User(UUID id, @Email String login, String password, UserRole role, Player player) {
 		super();
 		this.id = id;
 		this.login = login;
 		this.password = password;
 		this.role = role;
+		this.player = player;
 	}
 
 	@Override
@@ -97,6 +103,14 @@ public class User implements UserDetails {
 
 	public void setRole(UserRole role) {
 		this.role = role;
+	}
+
+	public Player getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(Player player) {
+		this.player = player;
 	}
 
 	public void setPassword(String password) {
