@@ -1,17 +1,20 @@
 package com.example.demo.entity;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 import com.example.demo.enums.Player;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "tb_board")
@@ -22,17 +25,26 @@ public class Board implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private UUID id;
 
-	private Player[] column;
-	private Player[] rows;
+	@Size(min = 3, max = 3)
+	private List<Player> rows_1;
+	@Size(min = 3, max = 3)
+	private List<Player> rows_2;
+	@Size(min = 3, max = 3)
+	private List<Player> rows_3;
+
+	@JsonIgnore
+	@OneToOne(mappedBy = "board")
+	private Match match;
 
 	public Board() {
 	}
 
-	public Board(UUID id, Player[] column, Player[] rows) {
+	public Board(UUID id, List<Player> rows_1, List<Player> rows_2, List<Player> rows_3) {
 		super();
 		this.id = id;
-		this.column = column;
-		this.rows = rows;
+		this.rows_1 = rows_1;
+		this.rows_2 = rows_2;
+		this.rows_3 = rows_3;
 	}
 
 	public UUID getId() {
@@ -43,25 +55,28 @@ public class Board implements Serializable {
 		this.id = id;
 	}
 
-	public Player[] getColumn() {
-		return column;
+	public List<Player> getRows_1() {
+		return rows_1;
 	}
 
-	public void setColumn(Player[] column) {
-		this.column = column;
+	public void setRows_1(List<Player> rows_1) {
+		this.rows_1 = rows_1;
 	}
 
-	public Player[] getRows() {
-		return rows;
+	public List<Player> getRows_2() {
+		return rows_2;
 	}
 
-	public void setRows(Player[] rows) {
-		this.rows = rows;
+	public void setRows_2(List<Player> rows_2) {
+		this.rows_2 = rows_2;
 	}
 
-	@Override
-	public String toString() {
-		return "Board [id=" + id + ", column=" + Arrays.toString(column) + ", rows=" + Arrays.toString(rows) + "]";
+	public List<Player> getRows_3() {
+		return rows_3;
+	}
+
+	public void setRows_3(List<Player> rows_3) {
+		this.rows_3 = rows_3;
 	}
 
 	@Override

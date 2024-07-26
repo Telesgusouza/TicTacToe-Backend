@@ -1,10 +1,9 @@
 package com.example.demo.enums;
 
-
 public enum UserRole {
-	OUT_OF_START("out of start"), 
-	LOOKING_FOR_MATCH("looking for match"), 
-	ON_DEPARTURE("on departure");
+	OUT_OF_START("out of start"), // fora de partida
+	LOOKING_FOR_MATCH("looking for match"), // procurando partida
+	ON_DEPARTURE("on departure"); // em partida
 
 	private String role;
 

@@ -11,6 +11,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -22,10 +24,12 @@ public class Match implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private UUID id;
 
+	@OneToOne
+	@JoinColumn(name = "board_id")
 	private Board board;
 
-	private Player playerOne;
-	private Player playerTwo;
+	private Player playerOne = Player.PLAYER_ONE;
+	private Player playerTwo = Player.PLAYER_TWO;
 
 	private Integer numberOfWinsPlayerOne;
 	private Integer numberOfWinsPlayerTwo;
@@ -39,13 +43,11 @@ public class Match implements Serializable {
 	public Match() {
 	}
 
-	public Match(UUID id, Board board, Player playerOne, Player playerTwo, Integer numberOfWinsPlayerOne,
-			Integer numberOfWinsPlayerTwo, Integer numberOfMatches, Player whoseTurnIsIt, MatchStatus matchStatus) {
+	public Match(UUID id, Board board, Integer numberOfWinsPlayerOne, Integer numberOfWinsPlayerTwo,
+			Integer numberOfMatches, Player whoseTurnIsIt, MatchStatus matchStatus) {
 		super();
 		this.id = id;
 		this.board = board;
-		this.playerOne = playerOne;
-		this.playerTwo = playerTwo;
 		this.numberOfWinsPlayerOne = numberOfWinsPlayerOne;
 		this.numberOfWinsPlayerTwo = numberOfWinsPlayerTwo;
 		this.numberOfMatches = numberOfMatches;

@@ -13,6 +13,7 @@ import com.example.demo.config.TokenService;
 import com.example.demo.dto.RequestAuthDTO;
 import com.example.demo.dto.ResponseTokenDTO;
 import com.example.demo.entity.User;
+import com.example.demo.enums.Player;
 import com.example.demo.enums.UserRole;
 import com.example.demo.repository.UserRepository;
 
@@ -48,7 +49,7 @@ public class AuthorizationService implements UserDetailsService {
 			throw new RuntimeException("account already exists");
 
 		String encryptPassword = new BCryptPasswordEncoder().encode(data.password());
-		User newUser = new User(null, data.login(), encryptPassword, UserRole.OUT_OF_START);
+		User newUser = new User(null, data.login(), encryptPassword, UserRole.LOOKING_FOR_MATCH, Player.PLAYER_ONE); // OUT_OF_START
 
 		User user = this.repo.save(newUser);
 		var token = tokenService.generateToken(user);
