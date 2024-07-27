@@ -36,11 +36,6 @@ public class MatchService {
 
 			if (anotherPlayer == null || anotherPlayer.getId().equals(user.getId())) {
 
-				System.out.println("=================================");
-				System.out.println("deu erro");
-				System.out.println(anotherPlayer);
-				System.out.println("=================================");
-
 				user.setRole(UserRole.OUT_OF_START);
 				user.setPlayer(Player.PLAYER_ONE);
 
@@ -73,42 +68,6 @@ public class MatchService {
 			throw new RuntimeException("Error creating match");
 		}
 	}
-
-	/*
-	 * public Match creatingMatch(User user) { try {
-	 * user.setRole(UserRole.LOOKING_FOR_MATCH); User anotherPlayer =
-	 * this.userRepository.findByRole(UserRole.LOOKING_FOR_MATCH);
-	 * 
-	 * Random random = new Random(); int randomNumber = random.nextInt(2) + 1;
-	 * 
-	 * if (anotherPlayer == null) { user.setRole(UserRole.OUT_OF_START);
-	 * user.setPlayer(Player.PLAYER_ONE);
-	 * 
-	 * throw new RuntimeException("No other player found"); }
-	 * 
-	 * if (randomNumber == 1) { anotherPlayer.setPlayer(Player.PLAYER_TWO);
-	 * 
-	 * } else { user.setPlayer(Player.PLAYER_TWO);
-	 * 
-	 * }
-	 * 
-	 * user.setRole(UserRole.ON_DEPARTURE);
-	 * anotherPlayer.setRole(UserRole.ON_DEPARTURE);
-	 * 
-	 * Board newBoard = board();
-	 * 
-	 * Match newMatch = new Match(null, newBoard, 0, 0, 0, Player.PLAYER_ONE,
-	 * MatchStatus.MATCH_STARTED);
-	 * 
-	 * this.userRepository.save(anotherPlayer); this.userRepository.save(user);
-	 * 
-	 * Match match = this.matchRepository.save(newMatch);
-	 * 
-	 * return match; } catch (Exception e) { e.printStackTrace(); throw new
-	 * RuntimeException("Error creating match");
-	 * 
-	 * } }
-	 */
 
 	private Board board() {
 
