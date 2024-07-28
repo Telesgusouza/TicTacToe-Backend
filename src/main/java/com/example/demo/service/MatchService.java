@@ -30,11 +30,16 @@ public class MatchService {
 
 		try {
 
+<<<<<<< HEAD
 			UUID playerOne;
 			UUID playerTwo;
 
 			user.setRole(UserRole.LOOKING_FOR_MATCH);
 			this.userRepository.save(user);
+=======
+				user.setRole(UserRole.OUT_OF_START);
+				user.setPlayer(Player.PLAYER_ONE);
+>>>>>>> 390e684d5bae50aea049c6aa61f22152573529b4
 
 			User anotherPlayer = searchPlayer(user.getId());
 
@@ -54,6 +59,17 @@ public class MatchService {
 			throw new RuntimeException("error when creating the match");
 		}
 
+<<<<<<< HEAD
+=======
+	private Board board() {
+
+		Player noField = Player.NO_PLAYER;
+
+		Board newBoard = new Board(null, List.of(noField, noField, noField), List.of(noField, noField, noField),
+				List.of(noField, noField, noField));
+
+		return this.boardRepository.save(newBoard);
+>>>>>>> 390e684d5bae50aea049c6aa61f22152573529b4
 	}
 
 }
