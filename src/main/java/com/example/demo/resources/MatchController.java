@@ -15,15 +15,15 @@ import com.example.demo.service.MatchService;
 @RequestMapping(value = "/api/v1/match")
 public class MatchController {
 
+	// aqui criaremos as partidas porém precisaremos de um ticket para ter acesso
+
 	@Autowired
-	private MatchService repo = new MatchService();
+	private MatchService repo;
 
 	@PostMapping
-	public ResponseEntity<Match> postMethodName(@AuthenticationPrincipal User user) {
+	public ResponseEntity<Match> postMatch(@AuthenticationPrincipal User user) {
 
-
-		Match match = this.repo.creatingMatch(user);
-
+		Match match = this.repo.createMatch(user);
 		return ResponseEntity.ok().body(match);
 	}
 

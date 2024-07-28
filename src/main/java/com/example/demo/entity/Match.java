@@ -1,18 +1,14 @@
 package com.example.demo.entity;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
-
-import com.example.demo.enums.MatchStatus;
-import com.example.demo.enums.Player;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -24,35 +20,29 @@ public class Match implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private UUID id;
 
-	@OneToOne
-	@JoinColumn(name = "board_id")
-	private Board board;
+	private LocalDateTime matchCreationDate;
 
-	private Player playerOne = Player.PLAYER_ONE;
-	private Player playerTwo = Player.PLAYER_TWO;
+	private UUID idPlayerOne;
+	private UUID idPlayerTwo;
 
 	private Integer numberOfWinsPlayerOne;
 	private Integer numberOfWinsPlayerTwo;
 
 	private Integer numberOfMatches;
 
-	private Player whoseTurnIsIt;
-
-	private MatchStatus matchStatus;
-
 	public Match() {
 	}
 
-	public Match(UUID id, Board board, Integer numberOfWinsPlayerOne, Integer numberOfWinsPlayerTwo,
-			Integer numberOfMatches, Player whoseTurnIsIt, MatchStatus matchStatus) {
+	public Match(UUID id, LocalDateTime matchCreationDate, UUID idPlayerOne, UUID idPlayerTwo,
+			Integer numberOfWinsPlayerOne, Integer numberOfWinsPlayerTwo, Integer numberOfMatches) {
 		super();
 		this.id = id;
-		this.board = board;
+		this.matchCreationDate = matchCreationDate;
+		this.idPlayerOne = idPlayerOne;
+		this.idPlayerTwo = idPlayerTwo;
 		this.numberOfWinsPlayerOne = numberOfWinsPlayerOne;
 		this.numberOfWinsPlayerTwo = numberOfWinsPlayerTwo;
 		this.numberOfMatches = numberOfMatches;
-		this.whoseTurnIsIt = whoseTurnIsIt;
-		this.matchStatus = matchStatus;
 	}
 
 	public UUID getId() {
@@ -63,28 +53,28 @@ public class Match implements Serializable {
 		this.id = id;
 	}
 
-	public Board getBoard() {
-		return board;
+	public LocalDateTime getMatchCreationDate() {
+		return matchCreationDate;
 	}
 
-	public void setBoard(Board board) {
-		this.board = board;
+	public void setMatchCreationDate(LocalDateTime matchCreationDate) {
+		this.matchCreationDate = matchCreationDate;
 	}
 
-	public Player getPlayerOne() {
-		return playerOne;
+	public UUID getIdPlayerOne() {
+		return idPlayerOne;
 	}
 
-	public void setPlayerOne(Player playerOne) {
-		this.playerOne = playerOne;
+	public void setIdPlayerOne(UUID idPlayerOne) {
+		this.idPlayerOne = idPlayerOne;
 	}
 
-	public Player getPlayerTwo() {
-		return playerTwo;
+	public UUID getIdPlayerTwo() {
+		return idPlayerTwo;
 	}
 
-	public void setPlayerTwo(Player playerTwo) {
-		this.playerTwo = playerTwo;
+	public void setIdPlayerTwo(UUID idPlayerTwo) {
+		this.idPlayerTwo = idPlayerTwo;
 	}
 
 	public Integer getNumberOfWinsPlayerOne() {
@@ -111,28 +101,11 @@ public class Match implements Serializable {
 		this.numberOfMatches = numberOfMatches;
 	}
 
-	public Player getWhoseTurnIsIt() {
-		return whoseTurnIsIt;
-	}
-
-	public void setWhoseTurnIsIt(Player whoseTurnIsIt) {
-		this.whoseTurnIsIt = whoseTurnIsIt;
-	}
-
-	public MatchStatus getMatchStatus() {
-		return matchStatus;
-	}
-
-	public void setMatchStatus(MatchStatus matchStatus) {
-		this.matchStatus = matchStatus;
-	}
-
 	@Override
 	public String toString() {
-		return "Match [id=" + id + ", board=" + board + ", playerOne=" + playerOne + ", playerTwo=" + playerTwo
-				+ ", numberOfWinsPlayerOne=" + numberOfWinsPlayerOne + ", numberOfWinsPlayerTwo="
-				+ numberOfWinsPlayerTwo + ", numberOfMatches=" + numberOfMatches + ", whoseTurnIsIt=" + whoseTurnIsIt
-				+ ", matchStatus=" + matchStatus + "]";
+		return "Match [id=" + id + ", matchCreationDate=" + matchCreationDate + ", idPlayerOne=" + idPlayerOne
+				+ ", idPlayerTwo=" + idPlayerTwo + ", numberOfWinsPlayerOne=" + numberOfWinsPlayerOne
+				+ ", numberOfWinsPlayerTwo=" + numberOfWinsPlayerTwo + ", numberOfMatches=" + numberOfMatches + "]";
 	}
 
 	@Override

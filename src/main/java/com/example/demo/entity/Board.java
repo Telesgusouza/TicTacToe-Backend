@@ -6,18 +6,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.example.demo.enums.Player;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 
 @Entity
-@Table(name = "tb_board")
 public class Board implements Serializable {
 	private static final long serialVersionUID = 1338149900643370484L;
 
@@ -32,14 +28,12 @@ public class Board implements Serializable {
 	@Size(min = 3, max = 3)
 	private List<Player> rows_3;
 
-	@JsonIgnore
-	@OneToOne(mappedBy = "board")
-	private Match match;
-
 	public Board() {
 	}
 
-	public Board(UUID id, List<Player> rows_1, List<Player> rows_2, List<Player> rows_3) {
+	public Board(
+			UUID id, 
+			List<Player> rows_1, List<Player> rows_2, List<Player> rows_3) {
 		super();
 		this.id = id;
 		this.rows_1 = rows_1;
