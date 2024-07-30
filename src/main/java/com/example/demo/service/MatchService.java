@@ -1,15 +1,19 @@
 package com.example.demo.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.entity.Board;
 import com.example.demo.entity.Match;
 import com.example.demo.entity.User;
+import com.example.demo.enums.Player;
 import com.example.demo.enums.UserRole;
+import com.example.demo.repository.BoardRepository;
 import com.example.demo.repository.MatchRepository;
 import com.example.demo.repository.UserRepository;
 
@@ -18,6 +22,9 @@ public class MatchService {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private BoardRepository boardRepository;
 
 	@Autowired
 	private MatchRepository matchRepository;
@@ -30,16 +37,15 @@ public class MatchService {
 
 		try {
 
-<<<<<<< HEAD
 			UUID playerOne;
 			UUID playerTwo;
 
 			user.setRole(UserRole.LOOKING_FOR_MATCH);
+
+			user.setRole(UserRole.OUT_OF_START);
+			user.setPlayer(Player.PLAYER_ONE);
+
 			this.userRepository.save(user);
-=======
-				user.setRole(UserRole.OUT_OF_START);
-				user.setPlayer(Player.PLAYER_ONE);
->>>>>>> 390e684d5bae50aea049c6aa61f22152573529b4
 
 			User anotherPlayer = searchPlayer(user.getId());
 
@@ -51,6 +57,8 @@ public class MatchService {
 			playerOne = random == 1 ? user.getId() : anotherPlayer.getId();
 			playerTwo = random == 1 ? anotherPlayer.getId() : user.getId();
 
+			this.userRepository.save(user);
+
 			Match newMatch = new Match(null, LocalDateTime.now(), playerOne, playerTwo, 0, 0, 0);
 			Match match = this.matchRepository.save(newMatch);
 
@@ -58,9 +66,8 @@ public class MatchService {
 		} catch (Exception e) {
 			throw new RuntimeException("error when creating the match");
 		}
+	}
 
-<<<<<<< HEAD
-=======
 	private Board board() {
 
 		Player noField = Player.NO_PLAYER;
@@ -69,7 +76,6 @@ public class MatchService {
 				List.of(noField, noField, noField));
 
 		return this.boardRepository.save(newBoard);
->>>>>>> 390e684d5bae50aea049c6aa61f22152573529b4
 	}
 
 }

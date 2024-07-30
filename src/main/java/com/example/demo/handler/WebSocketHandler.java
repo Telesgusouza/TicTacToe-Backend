@@ -18,9 +18,11 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.example.demo.dto.RequestBoardDTO;
 import com.example.demo.entity.Board;
 import com.example.demo.enums.Player;
 import com.example.demo.service.TicketsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
@@ -66,12 +68,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 		String payload = (String) message.getPayload();
 
-		Board board = new Board(null, 
-				List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+		Board board = new Board(null, List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
 				List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
 				List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
 
 		if ("pong".equals(payload)) {
+
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
 			Runnable task = () -> {
@@ -86,6 +88,23 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 			// Fechar o executorService após a execução da tarefa
 			executorService.shutdown();
+		} else {
+
+			System.out.println("===================================");
+
+			System.out.println(payload);
+
+			ObjectMapper mapper = new ObjectMapper();
+
+			String jsonPayload = "{\"row\":1,\"column\":1}";
+
+			RequestBoardDTO movement = mapper.readValue(payload, RequestBoardDTO.class);
+
+			System.out.println(movement);
+
+			System.out.println("Row: " + movement.row());
+			System.out.println("Column: " + movement.column());
+
 		}
 
 	}
