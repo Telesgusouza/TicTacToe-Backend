@@ -22,7 +22,7 @@ public class TicketController {
 
 	@PostMapping(value = "/{id}")
 	public Map<String, String> buildTicket(@PathVariable UUID id) {
-		
+
 		String ticket = ticketsService.buildAndSaveTicket(id);
 
 		return Map.of("ticket", ticket);
