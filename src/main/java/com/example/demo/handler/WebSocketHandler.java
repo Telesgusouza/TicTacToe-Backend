@@ -96,8 +96,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 			ObjectMapper mapper = new ObjectMapper();
 
-			String jsonPayload = "{\"row\":1,\"column\":1}";
-
 			RequestBoardDTO movement = mapper.readValue(payload, RequestBoardDTO.class);
 
 			System.out.println(movement);
