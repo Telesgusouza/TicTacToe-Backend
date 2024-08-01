@@ -1,17 +1,18 @@
 package com.example.demo.service;
 
-import java.awt.PageAttributes.MediaType;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.example.demo.dto.MetadataResponseDTO;
+import com.example.demo.dto.ResponseUrlPhotoDTO;
 import com.example.demo.dto.ResultResponseDTO;
 
 @Service
@@ -27,6 +28,22 @@ public class S3Service {
 	}
 
 	public ResultResponseDTO upload(MultipartFile file, UUID filename) {
+
+		String contentType = file.getContentType();
+		if (contentType == null || !isImage(contentType)) {
+			MetadataResponseDTO metadataResponse = new MetadataResponseDTO("400", "invalid field", "0");
+			ResultResponseDTO response = new ResultResponseDTO(metadataResponse, null);
+
+			throw new RuntimeException("invalid typé file");
+		}
+
+		if (file == null || file.isEmpty()) {
+			MetadataResponseDTO metadadaResponse = new MetadataResponseDTO("400", "invalid field", "0");
+			ResultResponseDTO response = new ResultResponseDTO(metadadaResponse, null);
+
+			throw new RuntimeException("invalid field file");
+		}
+
 		try {
 			File fileSave = convertMultiPartToFile(file);
 			s3Client.putObject(bucketName, "" + filename, fileSave);
@@ -35,6 +52,7 @@ public class S3Service {
 			ResultResponseDTO response = new ResultResponseDTO(metadaResponse, filename);
 
 			return response;
+
 		} catch (Exception e) {
 			MetadataResponseDTO metadataResponse = new MetadataResponseDTO("400", "failed to upload file in s3 bucket",
 					"0");
@@ -73,6 +91,16 @@ public class S3Service {
 		fos.close();
 
 		return convFile;
+	}
+
+	public ResponseUrlPhotoDTO getPhoto(UUID id) {
+		try {
+
+			return new ResponseUrlPhotoDTO("" + s3Client.getUrl(bucketName, "" + id));
+
+		} catch (Exception e) {
+			throw new RuntimeException("Error get photo", e);
+		}
 	}
 
 }
