@@ -49,7 +49,7 @@ public class AuthorizationService implements UserDetailsService {
 			throw new RuntimeException("account already exists");
 
 		String encryptPassword = new BCryptPasswordEncoder().encode(data.password());
-		User newUser = new User(null, data.login(), encryptPassword, UserRole.LOOKING_FOR_MATCH, Player.PLAYER_ONE); // OUT_OF_START
+		User newUser = new User(null, data.login(), encryptPassword, UserRole.OUT_OF_START, Player.PLAYER_ONE, 0, 0, 0); //
 
 		User user = this.repo.save(newUser);
 		var token = tokenService.generateToken(user);

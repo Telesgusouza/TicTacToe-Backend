@@ -31,6 +31,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 	private Map<String, WebSocketSession> sessions;
 
+	private Board board = new Board(null, List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+			List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+			List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
+
 	public WebSocketHandler(TicketsService ticketsService) {
 		this.ticketsService = ticketsService;
 		sessions = new ConcurrentHashMap<>();
@@ -68,9 +72,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 		String payload = (String) message.getPayload();
 
-		Board board = new Board(null, List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
-				List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
-				List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
+//		board = new Board(null, List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+//				List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+//				List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
 
 		if ("pong".equals(payload)) {
 
@@ -90,6 +94,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			executorService.shutdown();
 		} else {
 
+			Player playerIsTurn = Player.PLAYER_ONE;
+
 			System.out.println("===================================");
 
 			System.out.println(payload);
@@ -97,6 +103,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			ObjectMapper mapper = new ObjectMapper();
 
 			RequestBoardDTO movement = mapper.readValue(payload, RequestBoardDTO.class);
+
+			if (Player.PLAYER_ONE == playerIsTurn || Player.PLAYER_TWO == playerIsTurn) {
+				System.out.println("Não é sua vez de jogar");
+				return;
+			}
+
+			playerIsTurn = playerIsTurn == Player.PLAYER_ONE ? Player.PLAYER_TWO : Player.PLAYER_ONE;
 
 			System.out.println(movement);
 

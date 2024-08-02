@@ -44,17 +44,26 @@ public class User implements UserDetails {
 	
 	@Enumerated(EnumType.STRING)
 	private Player player = Player.PLAYER_ONE;
+	
+	private Integer numberOfWins;
+	private Integer numberOfDefeats;
+	private Integer numberOfDraws;
+	
 
 	public User() {
 	}
 
-	public User(UUID id, @Email String login, String password, UserRole role, Player player) {
+	public User(UUID id, @Email String login, String password, UserRole role, Player player, Integer numberOfWins,
+			Integer numberOfDefeats, Integer numberOfDraws) {
 		super();
 		this.id = id;
 		this.login = login;
 		this.password = password;
 		this.role = role;
 		this.player = player;
+		this.numberOfWins = numberOfWins;
+		this.numberOfDefeats = numberOfDefeats;
+		this.numberOfDraws = numberOfDraws;
 	}
 
 	@Override
@@ -117,9 +126,35 @@ public class User implements UserDetails {
 		this.password = password;
 	}
 
+	public Integer getNumberOfWins() {
+		return numberOfWins;
+	}
+
+	public void setNumberOfWins(Integer numberOfWins) {
+		this.numberOfWins = numberOfWins;
+	}
+
+	public Integer getNumberOfDefeats() {
+		return numberOfDefeats;
+	}
+
+	public void setNumberOfDefeats(Integer numberOfDefeats) {
+		this.numberOfDefeats = numberOfDefeats;
+	}
+
+	public Integer getNumberOfDraws() {
+		return numberOfDraws;
+	}
+
+	public void setNumberOfDraws(Integer numberOfDraws) {
+		this.numberOfDraws = numberOfDraws;
+	}
+
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", login=" + login + ", password=" + password + ", role=" + role + "]";
+		return "User [id=" + id + ", login=" + login + ", password=" + password + ", role=" + role + ", player="
+				+ player + ", numberOfWins=" + numberOfWins + ", numberOfDefeats=" + numberOfDefeats
+				+ ", numberOfDraws=" + numberOfDraws + "]";
 	}
 
 	@Override
