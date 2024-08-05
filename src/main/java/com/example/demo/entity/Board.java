@@ -11,7 +11,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.Size;
 
 @Entity
 public class Board implements Serializable {
@@ -21,19 +20,17 @@ public class Board implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private UUID id;
 
-	@Size(min = 3, max = 3)
+//	@Size(min = 3, max = 3)
 	private List<Player> rows_1;
-	@Size(min = 3, max = 3)
+//	@Size(min = 3, max = 3)
 	private List<Player> rows_2;
-	@Size(min = 3, max = 3)
+//	@Size(min = 3, max = 3)
 	private List<Player> rows_3;
 
 	public Board() {
 	}
 
-	public Board(
-			UUID id, 
-			List<Player> rows_1, List<Player> rows_2, List<Player> rows_3) {
+	public Board(UUID id, List<Player> rows_1, List<Player> rows_2, List<Player> rows_3) {
 		super();
 		this.id = id;
 		this.rows_1 = rows_1;
@@ -71,6 +68,13 @@ public class Board implements Serializable {
 
 	public void setRows_3(List<Player> rows_3) {
 		this.rows_3 = rows_3;
+	}
+	
+	
+
+	@Override
+	public String toString() {
+		return "Board [id=" + id + ", rows_1=" + rows_1 + ", rows_2=" + rows_2 + ", rows_3=" + rows_3 + "]";
 	}
 
 	@Override

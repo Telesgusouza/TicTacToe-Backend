@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -55,6 +57,10 @@ public class AuthorizationService implements UserDetailsService {
 		var token = tokenService.generateToken(user);
 
 		return new ResponseTokenDTO(token);
+	}
+
+	public User findById(UUID id) {
+		return repo.findById(id).orElseThrow(() -> new RuntimeException());
 	}
 
 }
