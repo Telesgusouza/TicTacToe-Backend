@@ -68,6 +68,10 @@ public class MatchService {
 		}
 	}
 
+	public Match findById(UUID id) {
+		return matchRepository.findById(id).orElseThrow(() -> new RuntimeException("match not found"));
+	}
+	
 	private Board board() {
 
 		Player noField = Player.NO_PLAYER;

@@ -1,14 +1,17 @@
 package com.example.demo.handler;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -20,7 +23,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.demo.dto.RequestBoardDTO;
 import com.example.demo.entity.Board;
+import com.example.demo.entity.Match;
 import com.example.demo.enums.Player;
+import com.example.demo.service.AuthorizationService;
+import com.example.demo.service.MatchService;
 import com.example.demo.service.TicketsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,9 +37,19 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 	private Map<String, WebSocketSession> sessions;
 
-	private Board board = new Board(null, List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
-			List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
-			List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
+	private Board board = new Board(null, Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+			Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+			Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
+
+	@Autowired
+	private MatchService matchRepo;
+
+	@Autowired
+	private AuthorizationService userRepo;
+
+	private Match match;
+
+	private Player currentPlayer = Player.PLAYER_ONE;
 
 	public WebSocketHandler(TicketsService ticketsService) {
 		this.ticketsService = ticketsService;
@@ -44,6 +60,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 
 		System.out.println("[afterConnectionEstablished] session id " + session.getId());
+
+		bringMatch(session);
+
+		if (match.getIdPlayerOne().equals(match.getIdPlayerTwo())) {
+			System.out.println("existe apenas um jogador");
+			throw new RuntimeException("there is only one player");
+		}
 
 		Optional<String> ticket = ticketOf(session);
 
@@ -67,14 +90,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 	}
 
+	@SuppressWarnings("static-access")
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-
 		String payload = (String) message.getPayload();
-
-//		board = new Board(null, List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
-//				List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
-//				List.of(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
 
 		if ("pong".equals(payload)) {
 
@@ -94,27 +113,20 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			executorService.shutdown();
 		} else {
 
-			Player playerIsTurn = Player.PLAYER_ONE;
-
-			System.out.println("===================================");
-
-			System.out.println(payload);
-
 			ObjectMapper mapper = new ObjectMapper();
-
 			RequestBoardDTO movement = mapper.readValue(payload, RequestBoardDTO.class);
 
-			if (Player.PLAYER_ONE == playerIsTurn || Player.PLAYER_TWO == playerIsTurn) {
-				System.out.println("Não é sua vez de jogar");
-				return;
+			// vez do jogador errado
+			if (currentPlayer != movement.player()) {
+				System.out.println("não é sua vez de jogar");
+				throw new RuntimeException("It's not this player's turn");
 			}
 
-			playerIsTurn = playerIsTurn == Player.PLAYER_ONE ? Player.PLAYER_TWO : Player.PLAYER_ONE;
+			currentPlayer = switchPlayer(currentPlayer);
 
-			System.out.println(movement);
+			String move = move(movement);
 
-			System.out.println("Row: " + movement.row());
-			System.out.println("Column: " + movement.column());
+			session.sendMessage(new TextMessage(move));
 
 		}
 
@@ -129,6 +141,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 	}
 
+	// OUTRAS FUNÇÕES
 	private void close(WebSocketSession session, CloseStatus status) {
 		try {
 			session.close(status);
@@ -138,11 +151,111 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 	}
 
-	public Optional<String> ticketOf(WebSocketSession session) {
+	private Optional<String> ticketOf(WebSocketSession session) {
 
 		return Optional.ofNullable(session.getUri()).map(UriComponentsBuilder::fromUri).map(UriComponentsBuilder::build)
 				.map(UriComponents::getQueryParams).map(it -> it.get("ticket")).flatMap(it -> it.stream().findFirst())
 				.map(String::trim);
+
+	}
+
+	private Optional<String> matchOf(WebSocketSession session) {
+		return Optional.ofNullable(session.getUri()).map(UriComponentsBuilder::fromUri).map(UriComponentsBuilder::build)
+				.map(UriComponents::getQueryParams).map(it -> it.get("server")).flatMap(it -> it.stream().findFirst())
+				.map(String::trim);
+	}
+
+	private void bringMatch(WebSocketSession session) {
+
+		Optional<String> uriMatch = matchOf(session);
+
+		if (!uriMatch.isPresent()) {
+			throw new RuntimeException("match not found");
+		}
+
+		String matchIdString = uriMatch.get();
+
+		UUID matchId;
+		try {
+			matchId = UUID.fromString(matchIdString);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Invalid UUID format", e);
+		}
+
+		Match match = matchRepo.findById(matchId);
+
+		this.match = match;
+
+	}
+
+	private Player switchPlayer(Player currentPlayer) {
+		return currentPlayer == Player.PLAYER_ONE ? Player.PLAYER_TWO : Player.PLAYER_ONE;
+	}
+
+	private String move(RequestBoardDTO movement) {
+
+		try {
+
+			ObjectMapper mapper = new ObjectMapper();
+			List<Player> array;
+
+			int column = movement.column();
+			Player player = movement.player();
+
+			switch (movement.row() - 1) {
+			case 0: {
+
+				if (board.getRows_1().get(movement.column() - 1) != Player.NO_PLAYER) {
+					System.out.println("campo ja preenchido");
+					return mapper.writeValueAsString("field already filled in");
+				}
+
+				array = board.getRows_1();
+				array.set(column - 1, player);
+				board.setRows_1(array);
+
+				break;
+
+			}
+			case 1: {
+
+				if (board.getRows_2().get(movement.column() - 1) != Player.NO_PLAYER) {
+					System.out.println("campo ja preenchido");
+					throw new RuntimeException("field already filled");
+				}
+
+				array = board.getRows_2();
+				array.set(column - 1, player);
+				board.setRows_2(array);
+
+				break;
+
+			}
+			case 2: {
+
+				if (board.getRows_3().get(movement.column() - 1) != Player.NO_PLAYER) {
+					System.out.println("campo ja preenchido");
+					throw new RuntimeException("field already filled");
+				}
+
+				array = board.getRows_3();
+				array.set(column - 1, player);
+				board.setRows_3(array);
+
+				break;
+
+			}
+
+			default:
+				throw new IllegalArgumentException("Unexpected value: " + (movement.row() - 1));
+			}
+
+			return mapper.writeValueAsString(board);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
 
 	}
 
