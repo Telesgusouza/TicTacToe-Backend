@@ -12,8 +12,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -22,12 +24,14 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.demo.dto.RequestBoardDTO;
+import com.example.demo.dto.ResponseWSBoardDTO;
 import com.example.demo.entity.Board;
 import com.example.demo.entity.Match;
 import com.example.demo.enums.Player;
 import com.example.demo.service.AuthorizationService;
 import com.example.demo.service.MatchService;
 import com.example.demo.service.TicketsService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
@@ -49,7 +53,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 	private Match match;
 
-	private Player currentPlayer = Player.PLAYER_ONE;
+	private Player currentPlayer = Player.PLAYER_TWO;
+	ObjectMapper mapper = new ObjectMapper();
 
 	public WebSocketHandler(TicketsService ticketsService) {
 		this.ticketsService = ticketsService;
@@ -62,6 +67,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		System.out.println("[afterConnectionEstablished] session id " + session.getId());
 
 		bringMatch(session);
+		currentPlayer = Player.PLAYER_TWO;
+		board = new Board(null, Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+				Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+				Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
 
 		if (match.getIdPlayerOne().equals(match.getIdPlayerTwo())) {
 			System.out.println("existe apenas um jogador");
@@ -95,7 +104,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 		String payload = (String) message.getPayload();
 
-		if ("pong".equals(payload)) {
+		/* if ("pong".equals(payload)) {
 
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -111,9 +120,20 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 			// Fechar o executorService após a execução da tarefa
 			executorService.shutdown();
-		} else {
+		} 
+		
+		
+		else */if ("view board".equals(payload)) {
 
 			ObjectMapper mapper = new ObjectMapper();
+
+			ResponseWSBoardDTO data = new ResponseWSBoardDTO(board, currentPlayer);
+
+			String boardString = mapper.writeValueAsString(data);
+			session.sendMessage(new TextMessage(boardString));
+
+		} else {
+
 			RequestBoardDTO movement = mapper.readValue(payload, RequestBoardDTO.class);
 
 			// vez do jogador errado
@@ -124,22 +144,140 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 			currentPlayer = switchPlayer(currentPlayer);
 
-			String move = move(movement);
+			String move = move(movement); // turnPlayer === currentPlayer
 
 			session.sendMessage(new TextMessage(move));
+			sessions.put(session.getId(), session);
 
 		}
-
+		
+	}
+	
+	/////
+	public void sendPing(WebSocketSession session) {
+	    try {
+	        session.sendMessage(new TextMessage("ping"));
+	    } catch (IOException e) {
+	        System.out.println("Erro ao enviar ping para a sessão " + session.getId());
+	    }
 	}
 
 	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+	protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
+	    super.handlePongMessage(session, message);
+	    System.out.println("Recebido pong da sessão " + session.getId());
+	}
 
+	/////
+
+	@Override
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+	    super.afterConnectionClosed(session, status);
+	    sessions.remove(session.getId());
+	    System.out.println("Sessão WebSocket fechada: " + session.getId());
+		
+		/*
 		System.out.println("[afterConnectionClosed] session id " + session.getId());
 
 		session.close();
-
+		*/
 	}
+	
+	@Scheduled(fixedRate = 60000) // Executa a cada minuto
+	public void cleanInactiveSessions() {
+	    sessions.values().removeIf(session -> {
+	        try {
+	            session.isOpen();
+	            return false; // Sessão ativa, mantém
+	        } catch (RuntimeException e) {
+	            return true; // Sessão inativa, remove
+	        }
+	    });
+	}
+
+	private void broadcastUpdate(ResponseWSBoardDTO data) {
+		String jsonData;
+
+		try {
+			jsonData = mapper.writeValueAsString(data);
+
+			sessions.values().removeIf(session -> {
+				try {
+					session.sendMessage(new TextMessage(jsonData));
+					return false;
+				} catch (IOException e) {
+					System.err.println("Error sending update to session " + session.getId());
+//					e.printStackTrace();
+					return true;
+				}
+			});
+
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	//////
+	private String move(RequestBoardDTO movement) {
+		
+		try {
+			List<Player> array;
+
+			int column = movement.column();
+			Player player = movement.player();
+
+			switch (movement.row()) {
+			case 0: {
+				if (board.getRows_1().get(column) != Player.NO_PLAYER) {
+					System.out.println("campo já preenchido");
+					return mapper.writeValueAsString("field already filled in");
+				}
+
+				array = board.getRows_1();
+				array.set(column, player);
+				board.setRows_1(array);
+				break;
+			}
+			case 1: {
+				if (board.getRows_2().get(column) != Player.NO_PLAYER) {
+					System.out.println("campo já preenchido");
+					throw new RuntimeException("field already filled");
+				}
+
+				array = board.getRows_2();
+				array.set(column, player);
+				board.setRows_2(array);
+				break;
+			}
+			case 2: {
+				if (board.getRows_3().get(column) != Player.NO_PLAYER) {
+					System.out.println("campo já preenchido");
+					throw new RuntimeException("field already filled");
+				}
+
+				array = board.getRows_3();
+				array.set(column, player);
+				board.setRows_3(array);
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("Valor inesperado: " + (movement.row() - 1));
+			}
+
+			ResponseWSBoardDTO data = new ResponseWSBoardDTO(board, currentPlayer);
+
+			broadcastUpdate(data);
+
+			// playerTurn
+			return mapper.writeValueAsString(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+
+	/////
 
 	// OUTRAS FUNÇÕES
 	private void close(WebSocketSession session, CloseStatus status) {
@@ -182,7 +320,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			throw new RuntimeException("Invalid UUID format", e);
 		}
 
-		Match match = matchRepo.findById(matchId);
+		Match match = matchRepo.getMatch(matchId);
 
 		this.match = match;
 
@@ -190,73 +328,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 	private Player switchPlayer(Player currentPlayer) {
 		return currentPlayer == Player.PLAYER_ONE ? Player.PLAYER_TWO : Player.PLAYER_ONE;
-	}
-
-	private String move(RequestBoardDTO movement) {
-
-		try {
-
-			ObjectMapper mapper = new ObjectMapper();
-			List<Player> array;
-
-			int column = movement.column();
-			Player player = movement.player();
-
-			switch (movement.row() - 1) {
-			case 0: {
-
-				if (board.getRows_1().get(movement.column() - 1) != Player.NO_PLAYER) {
-					System.out.println("campo ja preenchido");
-					return mapper.writeValueAsString("field already filled in");
-				}
-
-				array = board.getRows_1();
-				array.set(column - 1, player);
-				board.setRows_1(array);
-
-				break;
-
-			}
-			case 1: {
-
-				if (board.getRows_2().get(movement.column() - 1) != Player.NO_PLAYER) {
-					System.out.println("campo ja preenchido");
-					throw new RuntimeException("field already filled");
-				}
-
-				array = board.getRows_2();
-				array.set(column - 1, player);
-				board.setRows_2(array);
-
-				break;
-
-			}
-			case 2: {
-
-				if (board.getRows_3().get(movement.column() - 1) != Player.NO_PLAYER) {
-					System.out.println("campo ja preenchido");
-					throw new RuntimeException("field already filled");
-				}
-
-				array = board.getRows_3();
-				array.set(column - 1, player);
-				board.setRows_3(array);
-
-				break;
-
-			}
-
-			default:
-				throw new IllegalArgumentException("Unexpected value: " + (movement.row() - 1));
-			}
-
-			return mapper.writeValueAsString(board);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-
 	}
 
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.config.TokenService;
 import com.example.demo.dto.RequestAuthDTO;
+import com.example.demo.dto.RequestRegisterDTO;
 import com.example.demo.dto.ResponseTokenDTO;
 import com.example.demo.entity.User;
 import com.example.demo.enums.Player;
@@ -46,12 +47,13 @@ public class AuthorizationService implements UserDetailsService {
 		return new ResponseTokenDTO(token);
 	}
 
-	public ResponseTokenDTO register(RequestAuthDTO data) {
+	public ResponseTokenDTO register(RequestRegisterDTO data) {
 		if (this.repo.findByLogin(data.login()) != null)
 			throw new RuntimeException("account already exists");
 
 		String encryptPassword = new BCryptPasswordEncoder().encode(data.password());
-		User newUser = new User(null, data.login(), encryptPassword, UserRole.OUT_OF_START, Player.PLAYER_ONE, 0, 0, 0); //
+		User newUser = new User(null, data.name(), data.login(), encryptPassword, UserRole.OUT_OF_START,
+				Player.PLAYER_ONE, 0, 0, 0); //
 
 		User user = this.repo.save(newUser);
 		var token = tokenService.generateToken(user);
@@ -60,7 +62,7 @@ public class AuthorizationService implements UserDetailsService {
 	}
 
 	public User findById(UUID id) {
-		return repo.findById(id).orElseThrow(() -> new RuntimeException());
+		return repo.findById(id).orElseThrow(() -> new RuntimeException("No user found"));
 	}
 
 }
