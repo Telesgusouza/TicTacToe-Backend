@@ -42,7 +42,6 @@ public class MatchService {
 
 			user.setRole(UserRole.LOOKING_FOR_MATCH);
 
-			user.setRole(UserRole.OUT_OF_START);
 			user.setPlayer(Player.PLAYER_ONE);
 
 			this.userRepository.save(user);
@@ -64,14 +63,20 @@ public class MatchService {
 
 			return match;
 		} catch (Exception e) {
+			user.setRole(UserRole.OUT_OF_START);
+
+			user.setPlayer(Player.PLAYER_ONE);
+
+			this.userRepository.save(user);
+
 			throw new RuntimeException("error when creating the match");
 		}
 	}
 
-	public Match findById(UUID id) {
+	public Match getMatch(UUID id) {
 		return matchRepository.findById(id).orElseThrow(() -> new RuntimeException("match not found"));
 	}
-	
+
 	private Board board() {
 
 		Player noField = Player.NO_PLAYER;

@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.example.demo.enums.Player;
 import com.example.demo.enums.UserRole;
 
-import ch.qos.logback.core.joran.spi.EventPlayer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,6 +31,8 @@ public class User implements UserDetails {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private UUID id;
 
+	private String name;
+
 	@Email
 	@Column(nullable = false)
 	private String login;
@@ -41,22 +42,22 @@ public class User implements UserDetails {
 
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
-	
+
 	@Enumerated(EnumType.STRING)
-	private Player player = Player.PLAYER_ONE;
-	
+	private Player player = Player.NO_PLAYER;
+
 	private Integer numberOfWins;
 	private Integer numberOfDefeats;
 	private Integer numberOfDraws;
-	
 
 	public User() {
 	}
 
-	public User(UUID id, @Email String login, String password, UserRole role, Player player, Integer numberOfWins,
-			Integer numberOfDefeats, Integer numberOfDraws) {
+	public User(UUID id, String name, @Email String login, String password, UserRole role, Player player,
+			Integer numberOfWins, Integer numberOfDefeats, Integer numberOfDraws) {
 		super();
 		this.id = id;
+		this.name = name;
 		this.login = login;
 		this.password = password;
 		this.role = role;
@@ -150,10 +151,18 @@ public class User implements UserDetails {
 		this.numberOfDraws = numberOfDraws;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", login=" + login + ", password=" + password + ", role=" + role + ", player="
-				+ player + ", numberOfWins=" + numberOfWins + ", numberOfDefeats=" + numberOfDefeats
+		return "User [id=" + id + ", name=" + name + ", login=" + login + ", password=" + password + ", role=" + role
+				+ ", player=" + player + ", numberOfWins=" + numberOfWins + ", numberOfDefeats=" + numberOfDefeats
 				+ ", numberOfDraws=" + numberOfDraws + "]";
 	}
 

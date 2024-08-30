@@ -2,6 +2,7 @@ package com.example.demo.resources;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,7 @@ import com.example.demo.service.S3Service;
 
 @RestController
 @RequestMapping("/api/v1/file")
+@CrossOrigin(origins = "*")
 public class FileController {
 
 	@Autowired
