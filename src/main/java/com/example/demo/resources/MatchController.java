@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.RequestMatchScoreboardDTO;
 import com.example.demo.entity.Match;
 import com.example.demo.entity.User;
 import com.example.demo.service.MatchService;
@@ -37,6 +39,14 @@ public class MatchController {
 	public ResponseEntity<Match> postMatch(@AuthenticationPrincipal User user) {
 
 		Match match = this.repo.createMatch(user);
+		return ResponseEntity.ok().body(match);
+	}
+
+	@PostMapping("/{id}")
+	public ResponseEntity<Match> modifyMatchScoreboard(@PathVariable UUID id,
+			@RequestBody RequestMatchScoreboardDTO data) {
+
+		Match match = this.repo.modifyMatchScoreboard(id, data);
 		return ResponseEntity.ok().body(match);
 	}
 

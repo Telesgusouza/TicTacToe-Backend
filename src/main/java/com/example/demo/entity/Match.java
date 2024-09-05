@@ -28,13 +28,16 @@ public class Match implements Serializable {
 	private Integer numberOfWinsPlayerOne;
 	private Integer numberOfWinsPlayerTwo;
 
+	private Integer numberOfDraws;
+
 	private Integer numberOfMatches;
 
 	public Match() {
 	}
 
 	public Match(UUID id, LocalDateTime matchCreationDate, UUID idPlayerOne, UUID idPlayerTwo,
-			Integer numberOfWinsPlayerOne, Integer numberOfWinsPlayerTwo, Integer numberOfMatches) {
+			Integer numberOfWinsPlayerOne, Integer numberOfWinsPlayerTwo, Integer numberOfDraws,
+			Integer numberOfMatches) {
 		super();
 		this.id = id;
 		this.matchCreationDate = matchCreationDate;
@@ -42,6 +45,7 @@ public class Match implements Serializable {
 		this.idPlayerTwo = idPlayerTwo;
 		this.numberOfWinsPlayerOne = numberOfWinsPlayerOne;
 		this.numberOfWinsPlayerTwo = numberOfWinsPlayerTwo;
+		this.numberOfDraws = numberOfDraws;
 		this.numberOfMatches = numberOfMatches;
 	}
 
@@ -77,8 +81,16 @@ public class Match implements Serializable {
 		this.idPlayerTwo = idPlayerTwo;
 	}
 
+	public Integer getNumberOfDraws() {
+		return numberOfDraws == null ? 0 : numberOfDraws;
+	}
+
+	public void setNumberOfDraws(Integer numberOfDraws) {
+		this.numberOfDraws = numberOfDraws;
+	}
+
 	public Integer getNumberOfWinsPlayerOne() {
-		return numberOfWinsPlayerOne;
+		return numberOfWinsPlayerOne == null ? 0 : numberOfWinsPlayerOne;
 	}
 
 	public void setNumberOfWinsPlayerOne(Integer numberOfWinsPlayerOne) {
@@ -86,7 +98,7 @@ public class Match implements Serializable {
 	}
 
 	public Integer getNumberOfWinsPlayerTwo() {
-		return numberOfWinsPlayerTwo;
+		return numberOfWinsPlayerTwo == null ? 0 : numberOfWinsPlayerTwo;
 	}
 
 	public void setNumberOfWinsPlayerTwo(Integer numberOfWinsPlayerTwo) {
@@ -94,7 +106,7 @@ public class Match implements Serializable {
 	}
 
 	public Integer getNumberOfMatches() {
-		return numberOfMatches;
+		return numberOfMatches == null ? 0 : numberOfMatches;
 	}
 
 	public void setNumberOfMatches(Integer numberOfMatches) {
@@ -105,7 +117,8 @@ public class Match implements Serializable {
 	public String toString() {
 		return "Match [id=" + id + ", matchCreationDate=" + matchCreationDate + ", idPlayerOne=" + idPlayerOne
 				+ ", idPlayerTwo=" + idPlayerTwo + ", numberOfWinsPlayerOne=" + numberOfWinsPlayerOne
-				+ ", numberOfWinsPlayerTwo=" + numberOfWinsPlayerTwo + ", numberOfMatches=" + numberOfMatches + "]";
+				+ ", numberOfWinsPlayerTwo=" + numberOfWinsPlayerTwo + ", numberOfDraws=" + numberOfDraws
+				+ ", numberOfMatches=" + numberOfMatches + "]";
 	}
 
 	@Override

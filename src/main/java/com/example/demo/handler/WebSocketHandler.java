@@ -45,6 +45,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
 			Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
 
+	private String standingGame = "standing game";
+
 	@Autowired
 	private MatchService matchRepo;
 
@@ -67,10 +69,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		System.out.println("[afterConnectionEstablished] session id " + session.getId());
 
 		bringMatch(session);
-		currentPlayer = Player.PLAYER_TWO;
-		board = new Board(null, Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
-				Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
-				Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
 
 		if (match.getIdPlayerOne().equals(match.getIdPlayerTwo())) {
 			System.out.println("existe apenas um jogador");
@@ -104,26 +102,23 @@ public class WebSocketHandler extends TextWebSocketHandler {
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 		String payload = (String) message.getPayload();
 
-		/* if ("pong".equals(payload)) {
-
-			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-
-			Runnable task = () -> {
-				try {
-					session.sendMessage(new TextMessage("ping"));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			};
-
-			executorService.schedule(task, 4, TimeUnit.SECONDS);
-
-			// Fechar o executorService após a execução da tarefa
-			executorService.shutdown();
-		} 
-		
-		
-		else */if ("view board".equals(payload)) {
+		/*
+		 * if ("pong".equals(payload)) {
+		 * 
+		 * ScheduledExecutorService executorService =
+		 * Executors.newSingleThreadScheduledExecutor();
+		 * 
+		 * Runnable task = () -> { try { session.sendMessage(new TextMessage("ping")); }
+		 * catch (IOException e) { e.printStackTrace(); } };
+		 * 
+		 * executorService.schedule(task, 4, TimeUnit.SECONDS);
+		 * 
+		 * // Fechar o executorService após a execução da tarefa
+		 * executorService.shutdown(); }
+		 * 
+		 * 
+		 * else
+		 */ if ("view board".equals(payload)) {
 
 			ObjectMapper mapper = new ObjectMapper();
 
@@ -132,7 +127,73 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			String boardString = mapper.writeValueAsString(data);
 			session.sendMessage(new TextMessage(boardString));
 
-		} else {
+		}
+
+		else if ("reset board".equals(payload)) {
+
+			board = new Board(null, Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+					Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+					Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
+
+			ResponseWSBoardDTO data = new ResponseWSBoardDTO(board, currentPlayer);
+			broadcastUpdate(data);
+			String resetBoard = mapper.writeValueAsString(data);
+
+			session.sendMessage(new TextMessage(resetBoard));
+			sessions.put(session.getId(), session);
+		}
+
+		else if ("standing game".equals(payload)) {
+			String msg = mapper.writeValueAsString(standingGame);
+
+			ScheduledExecutorService executeService = Executors.newSingleThreadScheduledExecutor();
+
+			Runnable task = () -> {
+				try {
+
+					sessions.values().removeIf(sessionValue -> {
+						try {
+							sessionValue.sendMessage(new TextMessage(standingGame));
+							return false;
+						} catch (Exception e) {
+							System.out.println("Error sending update to session " + sessionValue.getId());
+							return true;
+						}
+					});
+
+					session.sendMessage(new TextMessage(standingGame));
+					sessions.put(session.getId(), session);
+				} catch (Exception e) {
+					// TODO: handle exception
+					e.printStackTrace();
+				}
+			};
+
+			executeService.schedule(task, 4, TimeUnit.SECONDS);
+			executeService.shutdown();
+
+		}
+
+		else if ("close match".equals(payload)) {
+			standingGame = "close match";
+
+			String msg = mapper.writeValueAsString("close match");
+
+			sessions.values().removeIf(sessionValue -> {
+				try {
+					sessionValue.sendMessage(new TextMessage(msg));
+					return false;
+				} catch (IOException e) {
+					System.err.println("Error sending update to session " + sessionValue.getId());
+					return true;
+				}
+			});
+
+			session.sendMessage(new TextMessage(msg));
+			sessions.put(session.getId(), session);
+		}
+
+		else {
 
 			RequestBoardDTO movement = mapper.readValue(payload, RequestBoardDTO.class);
 
@@ -150,49 +211,64 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			sessions.put(session.getId(), session);
 
 		}
-		
+
 	}
-	
+
 	/////
 	public void sendPing(WebSocketSession session) {
-	    try {
-	        session.sendMessage(new TextMessage("ping"));
-	    } catch (IOException e) {
-	        System.out.println("Erro ao enviar ping para a sessão " + session.getId());
-	    }
+		try {
+			session.sendMessage(new TextMessage("ping"));
+		} catch (IOException e) {
+			System.out.println("Erro ao enviar ping para a sessão " + session.getId());
+		}
 	}
 
 	@Override
 	protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
-	    super.handlePongMessage(session, message);
-	    System.out.println("Recebido pong da sessão " + session.getId());
+		super.handlePongMessage(session, message);
+		System.out.println("Recebido pong da sessão " + session.getId());
 	}
 
 	/////
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-	    super.afterConnectionClosed(session, status);
-	    sessions.remove(session.getId());
-	    System.out.println("Sessão WebSocket fechada: " + session.getId());
-		
-		/*
-		System.out.println("[afterConnectionClosed] session id " + session.getId());
+		super.afterConnectionClosed(session, status);
 
-		session.close();
-		*/
+		/*
+		 * if (session.isOpen()) {
+		 * 
+		 * String msg = mapper.writeValueAsString("close match");
+		 * 
+		 * sessions.values().removeIf(sessionValue -> { try {
+		 * sessionValue.sendMessage(new TextMessage(msg)); return false; } catch
+		 * (IOException e) { System.err.println("Error sending update to session " +
+		 * sessionValue.getId()); return true; } });
+		 * 
+		 * session.sendMessage(new TextMessage(msg)); sessions.put(session.getId(),
+		 * session); }
+		 */
+
+		sessions.remove(session.getId());
+		System.out.println("Sessão WebSocket fechada: " + session.getId());
+
+		/*
+		 * System.out.println("[afterConnectionClosed] session id " + session.getId());
+		 * 
+		 * session.close();
+		 */
 	}
-	
+
 	@Scheduled(fixedRate = 60000) // Executa a cada minuto
 	public void cleanInactiveSessions() {
-	    sessions.values().removeIf(session -> {
-	        try {
-	            session.isOpen();
-	            return false; // Sessão ativa, mantém
-	        } catch (RuntimeException e) {
-	            return true; // Sessão inativa, remove
-	        }
-	    });
+		sessions.values().removeIf(session -> {
+			try {
+				session.isOpen();
+				return false; // Sessão ativa, mantém
+			} catch (RuntimeException e) {
+				return true; // Sessão inativa, remove
+			}
+		});
 	}
 
 	private void broadcastUpdate(ResponseWSBoardDTO data) {
@@ -220,7 +296,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 	//////
 	private String move(RequestBoardDTO movement) {
-		
+
 		try {
 			List<Player> array;
 
