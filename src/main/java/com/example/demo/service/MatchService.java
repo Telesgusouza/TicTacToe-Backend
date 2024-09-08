@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.RequestMatchScoreboardDTO;
+import com.example.demo.dto.ResponseUrlPhotoDTO;
 import com.example.demo.entity.Board;
 import com.example.demo.entity.Match;
 import com.example.demo.entity.User;
@@ -32,6 +33,9 @@ public class MatchService {
 
 	@Autowired
 	private MatchRepository matchRepository;
+	
+	@Autowired
+	private S3Service s3Service;
 
 	public User searchPlayer(UUID idUser) {
 		return this.userRepository.findByRoleAndIdNot(UserRole.LOOKING_FOR_MATCH, idUser);
@@ -62,14 +66,28 @@ public class MatchService {
 
 			this.userRepository.save(user);
 
-			Match newMatch = new Match(null, LocalDateTime.now(), playerOne, playerTwo, 0, 0, 0, 0);
+			// photos players
+			ResponseUrlPhotoDTO photoPlayerOne = this.s3Service.getPhoto(playerOne);
+			ResponseUrlPhotoDTO photoPlayerTwo = this.s3Service.getPhoto(playerTwo);
+			
+			Match newMatch = new Match(
+					null, 
+					
+					LocalDateTime.now(), 
+					
+					playerOne, 
+					playerTwo, 
+					
+					photoPlayerOne.photo(), 
+					photoPlayerTwo.photo(),
+					0, 0, 0, 0);
 			Match match = this.matchRepository.save(newMatch);
 
 			return match;
 		} catch (Exception e) {
 			user.setRole(UserRole.OUT_OF_START);
 
-			user.setPlayer(Player.PLAYER_ONE);
+			user.setPlayer(Player.NO_PLAYER);
 
 			this.userRepository.save(user);
 

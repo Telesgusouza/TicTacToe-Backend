@@ -25,6 +25,9 @@ public class Match implements Serializable {
 	private UUID idPlayerOne;
 	private UUID idPlayerTwo;
 
+	private String photoPlayerOne;
+	private String photoPlayerTwo;
+
 	private Integer numberOfWinsPlayerOne;
 	private Integer numberOfWinsPlayerTwo;
 
@@ -35,14 +38,20 @@ public class Match implements Serializable {
 	public Match() {
 	}
 
-	public Match(UUID id, LocalDateTime matchCreationDate, UUID idPlayerOne, UUID idPlayerTwo,
-			Integer numberOfWinsPlayerOne, Integer numberOfWinsPlayerTwo, Integer numberOfDraws,
+	public Match(UUID id, LocalDateTime matchCreationDate, UUID idPlayerOne, UUID idPlayerTwo, String photoPlayerOne,
+			String photoPlayerTwo, Integer numberOfWinsPlayerOne, Integer numberOfWinsPlayerTwo, Integer numberOfDraws,
 			Integer numberOfMatches) {
 		super();
 		this.id = id;
+		
 		this.matchCreationDate = matchCreationDate;
+		
 		this.idPlayerOne = idPlayerOne;
 		this.idPlayerTwo = idPlayerTwo;
+		
+		this.photoPlayerOne = photoPlayerOne;
+		this.photoPlayerTwo = photoPlayerTwo;
+		
 		this.numberOfWinsPlayerOne = numberOfWinsPlayerOne;
 		this.numberOfWinsPlayerTwo = numberOfWinsPlayerTwo;
 		this.numberOfDraws = numberOfDraws;
@@ -79,6 +88,22 @@ public class Match implements Serializable {
 
 	public void setIdPlayerTwo(UUID idPlayerTwo) {
 		this.idPlayerTwo = idPlayerTwo;
+	}
+
+	public String getPhotoPlayerOne() {
+		return photoPlayerOne;
+	}
+
+	public void setPhotoPlayerOne(String photoPlayerOne) {
+		this.photoPlayerOne = photoPlayerOne;
+	}
+
+	public String getPhotoPlayerTwo() {
+		return photoPlayerTwo;
+	}
+
+	public void setPhotoPlayerTwo(String photoPlayerTwo) {
+		this.photoPlayerTwo = photoPlayerTwo;
 	}
 
 	public Integer getNumberOfDraws() {
