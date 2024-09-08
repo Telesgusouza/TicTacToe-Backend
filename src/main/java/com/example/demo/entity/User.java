@@ -2,23 +2,29 @@ package com.example.demo.entity;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.hibernate.annotations.ManyToAny;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.demo.enums.Player;
 import com.example.demo.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 
@@ -50,6 +56,9 @@ public class User implements UserDetails {
 	private Integer numberOfDefeats;
 	private Integer numberOfDraws;
 
+    @OneToMany(mappedBy = "player_friend", fetch = FetchType.EAGER)
+    private List<Friend> friends = List.of();
+
 	public User() {
 	}
 
@@ -57,11 +66,14 @@ public class User implements UserDetails {
 			Integer numberOfWins, Integer numberOfDefeats, Integer numberOfDraws) {
 		super();
 		this.id = id;
+		
 		this.name = name;
 		this.login = login;
 		this.password = password;
+		
 		this.role = role;
 		this.player = player;
+		
 		this.numberOfWins = numberOfWins;
 		this.numberOfDefeats = numberOfDefeats;
 		this.numberOfDraws = numberOfDraws;
@@ -159,11 +171,19 @@ public class User implements UserDetails {
 		this.name = name;
 	}
 
+	public List<Friend> getFriends() {
+		return friends;
+	}
+
+	public void setFriends(List<Friend> friends) {
+		this.friends = friends;
+	}
+
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", name=" + name + ", login=" + login + ", password=" + password + ", role=" + role
 				+ ", player=" + player + ", numberOfWins=" + numberOfWins + ", numberOfDefeats=" + numberOfDefeats
-				+ ", numberOfDraws=" + numberOfDraws + "]";
+				+ ", numberOfDraws=" + numberOfDraws + ", friends=" + friends + "]";
 	}
 
 	@Override
