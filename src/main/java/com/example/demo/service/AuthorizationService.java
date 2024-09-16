@@ -72,7 +72,7 @@ public class AuthorizationService implements UserDetailsService {
 		return repo.findById(id).orElseThrow(() -> new RuntimeException("No user found"));
 	}
 
-	public User addToFriend(RequestFriendsDTO data, UUID id) {
+	public Friend addToFriend(RequestFriendsDTO data, UUID id) {
 
 		Optional<User> user = this.repo.findById(id);
 		User field = user.orElseThrow(() -> new RuntimeException("user not found"));
@@ -82,13 +82,16 @@ public class AuthorizationService implements UserDetailsService {
 			newFriend.setPlayer_friend(field);
 
 			field.getFriends().add(newFriend);
+
 			this.repoFriends.save(newFriend);
+			this.repo.save(field);
+
+			return newFriend;
 		} else {
 			System.out.println("Amigo já existe na lista de amigos");
 			throw new RuntimeException("Friend already exists in the friends list");
 		}
 
-		return this.repo.save(field);
 	}
 
 }

@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -27,7 +28,9 @@ import com.example.demo.dto.RequestBoardDTO;
 import com.example.demo.dto.ResponseWSBoardDTO;
 import com.example.demo.entity.Board;
 import com.example.demo.entity.Match;
+import com.example.demo.entity.User;
 import com.example.demo.enums.Player;
+import com.example.demo.event.MatchFoundEvent;
 import com.example.demo.service.AuthorizationService;
 import com.example.demo.service.MatchService;
 import com.example.demo.service.TicketsService;
@@ -35,13 +38,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
-public class WebSocketHandler extends TextWebSocketHandler {
+public class WebSocketHandler
+//implements ApplicationListener<MatchFoundEvent> {
+		extends TextWebSocketHandler implements ApplicationListener<MatchFoundEvent> {
 
 	private final TicketsService ticketsService;
 
 	private Map<String, WebSocketSession> sessions;
 
-	private Board board = new Board(null, Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+	private Board board = new Board(null, 
+			Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
 			Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
 			Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
 
@@ -89,9 +95,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			return;
 		}
 
-		Optional<String> uriServer = Optional.ofNullable(session.getUri()).map(UriComponentsBuilder::fromUri)
-				.map(UriComponentsBuilder::build).map(UriComponents::getQueryParams).map(it -> it.get("server"))
-				.flatMap(it -> it.stream().findFirst()).map(String::trim);
+		Optional<String> uriServer = Optional
+				.ofNullable(session.getUri())
+				.map(UriComponentsBuilder::fromUri)
+				.map(UriComponentsBuilder::build)
+				.map(UriComponents::getQueryParams)
+				.map(it -> it.get("server"))
+				.flatMap(it -> it.stream().findFirst())
+				.map(String::trim);
 
 		sessions.put(uriServer.toString(), session);
 
@@ -370,8 +381,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		return Optional.ofNullable(session.getUri()).map(UriComponentsBuilder::fromUri).map(UriComponentsBuilder::build)
 				.map(UriComponents::getQueryParams).map(it -> it.get("ticket")).flatMap(it -> it.stream().findFirst())
 				.map(String::trim);
-
 	}
+	
 
 	private Optional<String> matchOf(WebSocketSession session) {
 		return Optional.ofNullable(session.getUri()).map(UriComponentsBuilder::fromUri).map(UriComponentsBuilder::build)
@@ -404,6 +415,39 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 	private Player switchPlayer(Player currentPlayer) {
 		return currentPlayer == Player.PLAYER_ONE ? Player.PLAYER_TWO : Player.PLAYER_ONE;
+	}
+	
+	///////////////////////////////////////////////////////////
+
+	@Override
+	public void onApplicationEvent(MatchFoundEvent event) {
+		// Obter a sessão WebSocket aqui
+		WebSocketSession session = getWebSocketSession(event);
+
+		if (session != null && session.isOpen()) {
+			UUID matchId = event.getMatchId();
+			List<User> players = event.getPlayers();
+
+			for (User player : players) {
+				String payload = "match_found:" + matchId.toString() + ":" + player.getId().toString();
+				try {
+					session.sendMessage(new TextMessage(payload));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private WebSocketSession getWebSocketSession(MatchFoundEvent event) {
+		// Implemente a logicagem necessária para obter a sessão WebSocket
+		// Isso pode incluir buscar pelo usuário, pela partida, ou qualquer outra
+		// identificação relevante
+		// Por exemplo:
+//        User user = event.getPlayer(); // Assumindo que o evento contém o jogador
+		User user = event.getPlayers().getFirst(); // Assumindo que o evento contém o jogador
+		return sessions.get(user.getId().toString());
 	}
 
 }
