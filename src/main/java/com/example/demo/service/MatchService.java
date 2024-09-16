@@ -95,6 +95,8 @@ public class MatchService {
 		}
 	}
 
+	
+	
 	public Match getMatch(UUID id) {
 		return matchRepository.findById(id).orElseThrow(() -> new RuntimeException("match not found"));
 	}

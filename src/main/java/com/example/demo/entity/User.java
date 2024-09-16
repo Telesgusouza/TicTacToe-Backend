@@ -6,14 +6,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.hibernate.annotations.ManyToAny;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.example.demo.enums.Player;
 import com.example.demo.enums.UserRole;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,13 +22,13 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 
 @Table(name = "tb_users")
 @Entity(name = "tb_users")
+@CrossOrigin(origins = "*")
 public class User implements UserDetails {
 	private static final long serialVersionUID = -2378536838878240518L;
 
@@ -56,8 +55,8 @@ public class User implements UserDetails {
 	private Integer numberOfDefeats;
 	private Integer numberOfDraws;
 
-    @OneToMany(mappedBy = "player_friend", fetch = FetchType.EAGER)
-    private List<Friend> friends = List.of();
+	@OneToMany(mappedBy = "player_friend", fetch = FetchType.EAGER)
+	private List<Friend> friends = List.of();
 
 	public User() {
 	}
@@ -66,14 +65,14 @@ public class User implements UserDetails {
 			Integer numberOfWins, Integer numberOfDefeats, Integer numberOfDraws) {
 		super();
 		this.id = id;
-		
+
 		this.name = name;
 		this.login = login;
 		this.password = password;
-		
+
 		this.role = role;
 		this.player = player;
-		
+
 		this.numberOfWins = numberOfWins;
 		this.numberOfDefeats = numberOfDefeats;
 		this.numberOfDraws = numberOfDraws;
