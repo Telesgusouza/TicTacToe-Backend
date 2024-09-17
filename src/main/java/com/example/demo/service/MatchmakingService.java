@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.ResponseUrlPhotoDTO;
@@ -35,25 +36,45 @@ public class MatchmakingService {
 	private ApplicationEventPublisher eventPublisher;
 
 	private Queue<User> matchmakingQueue = new ConcurrentLinkedQueue<>();
-	
+
 	@Autowired
-    private ApplicationContext applicationContext;
+	private ApplicationContext applicationContext;
 
 	public void startMatchmaking(User user) {
+
 		user.setRole(UserRole.LOOKING_FOR_MATCH);
 		userRepository.save(user);
 		matchmakingQueue.offer(user);
 
 	}
 
-	private void checkForMatch() {
+	@Scheduled(fixedRate = 5000) // Verifica a cada 5 segundos
+	public void checkForMatch() {
+
 		if (matchmakingQueue.size() >= 2) {
 			User playerOne = matchmakingQueue.poll();
 			User playerTwo = matchmakingQueue.poll();
 
-			Match match = createMatch(playerOne, playerTwo);
+			try {
+				Match match = createMatch(playerOne, playerTwo);
+				notifyPlayersOfMatch(playerOne, playerTwo, match.getId());
+			} catch (Exception e) {
+				// Se houver um erro, devolve os jogadores para a fila
+				matchmakingQueue.offer(playerOne);
+				matchmakingQueue.offer(playerTwo);
+				System.err.println("Erro ao criar partida: " + e.getMessage());
+			}
 		}
 	}
+
+	// private void checkForMatch() {
+//		if (matchmakingQueue.size() >= 2) {
+//			User playerOne = matchmakingQueue.poll();
+//			User playerTwo = matchmakingQueue.poll();
+//
+//			Match match = createMatch(playerOne, playerTwo);
+//		}
+//	}
 
 	private Match createMatch(User playerOne, User playerTwo) {
 		try {
@@ -70,15 +91,11 @@ public class MatchmakingService {
 
 					0, 0, 0, 0);
 
-			Match match = this.matchRepository.save(newMatch);
-
-			return match;
+			return this.matchRepository.save(newMatch);
 		} catch (Exception e) {
 			throw new RuntimeException("error when creating the match");
 		}
 	}
-	
-
 
 	public void notifyPlayersOfMatch(User playerOne, User playerTwo, UUID matchId) {
 		eventPublisher.publishEvent(new MatchFoundEvent(matchId, Arrays.asList(playerOne, playerTwo)));
