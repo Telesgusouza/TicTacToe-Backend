@@ -8,6 +8,8 @@ import org.springframework.context.ApplicationEvent;
 import com.example.demo.entity.User;
 
 public class MatchFoundEvent extends ApplicationEvent {
+	private static final long serialVersionUID = 157301338970648229L;
+	
 	private final UUID matchId;
 	private final List<User> players;
 

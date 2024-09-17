@@ -53,35 +53,73 @@ public class WsWebSocketHandler extends TextWebSocketHandler implements Applicat
 		System.out.println("Received message: " + message);
 		// Processar a mensagem aqui
 	}
-
+	
 	@Override
 	public void onApplicationEvent(MatchFoundEvent event) {
-		// Obter a sessão WebSocket aqui
-//		WebSocketSession session = getWebSocketSession(event);
-		WebSocketSession session = sessions.get(event.getPlayers().getFirst().getId().toString());
+	    System.out.println("==================================");
+	    System.out.println("CHEGA AQUI");
+	    System.out.println(event);
+	    
+	    UUID matchId = event.getMatchId();
+	    List<User> players = event.getPlayers();
 
-		System.out.println("==================================");
-		System.out.println("CHEGA AQUI");
-
-		if (session != null && session.isOpen()) {
-			UUID matchId = event.getMatchId();
-			List<User> players = event.getPlayers();
-
-			System.out.println("primeiro IF (1° if)");
-
-			for (User player : players) {
-				System.out.println("primeiro FOR (1° for)");
-
-				String payload = "match_found:" + matchId.toString() + ":" + player.getId().toString();
-				try {
-					session.sendMessage(new TextMessage(payload));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
+	    for (User player : players) {
+	        String playerId = player.getId().toString();
+	        
+	        System.out.println("=====================================");
+	        System.out.println("Processando jogador: " + player.getLogin());
+	        
+	        WebSocketSession session = sessions.get(playerId);
+	        
+	        if (session != null && session.isOpen()) {
+	            System.out.println("Sessão encontrada e aberta para o jogador: " + player.getLogin());
+	            
+	            try {
+	                String payload = "match_found:" + matchId.toString() + ":" + playerId;
+	                session.sendMessage(new TextMessage(payload));
+	                
+	                System.out.println("Mensagem enviada com sucesso para o jogador: " + player.getLogin());
+	            } catch (IOException e) {
+	                System.err.println("Erro ao enviar mensagem para o jogador " + player.getLogin() + ": " + e.getMessage());
+	            }
+	        } else {
+	            System.out.println("Sessão não encontrada ou fechada para o jogador: " + player.getLogin());
+	        }
+	    }
 	}
+
+	
+//	@Override
+//	public void onApplicationEvent(MatchFoundEvent event) {
+//		// Obter a sessão WebSocket aqui
+//		WebSocketSession session = sessions.get(event.getPlayers().getFirst().getId().toString());
+//
+//		System.out.println("==================================");
+//		System.out.println("CHEGA AQUI");
+//		System.out.println(event);
+//
+//		if (session != null && session.isOpen()) {
+//			UUID matchId = event.getMatchId();
+//			List<User> players = event.getPlayers();
+//			
+//			System.out.println("=====================================");
+//			System.out.println("primeiro IF (1° if)");
+//
+//			for (User player : players) {
+//				
+//				System.out.println("=====================================");
+//				System.out.println("primeiro FOR (1° for)");
+//
+//				String payload = "match_found:" + matchId.toString() + ":" + player.getId().toString();
+//				try {
+//					session.sendMessage(new TextMessage(payload));
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+//	}
 
 //	private WebSocketSession getWebSocketSession(MatchFoundEvent event) {
 	private WebSocketSession getWebSocketSession(User user) {

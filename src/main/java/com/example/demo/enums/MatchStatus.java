@@ -13,5 +13,5 @@ public enum MatchStatus {
 	public String getRole() {
 		return role;
 	}
-
+	
 }
