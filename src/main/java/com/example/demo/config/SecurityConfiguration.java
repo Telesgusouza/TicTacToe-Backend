@@ -28,6 +28,7 @@ public class SecurityConfiguration {
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
+						.requestMatchers("/ws/**").authenticated()
 						.anyRequest().permitAll() 
 						)
 				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
