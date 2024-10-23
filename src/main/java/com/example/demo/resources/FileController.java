@@ -41,6 +41,12 @@ public class FileController {
 	public ResultResponseDTO deleteFile(@AuthenticationPrincipal User user) {
 		return s3Service.delete(user.getId());
 	}
+	
+	@GetMapping("/{id}")
+	public ResponseUrlPhotoDTO getPhoto(@PathVariable UUID id) {
+
+		return s3Service.getPhoto(id);
+	}
 
 	@GetMapping("/{id}")
 	public ResponseUrlPhotoDTO getPhoto(@PathVariable UUID id) {

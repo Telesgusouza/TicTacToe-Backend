@@ -15,5 +15,4 @@ public enum Player {
 	public String getRole() {
 		return this.role;
 	}
-
 }

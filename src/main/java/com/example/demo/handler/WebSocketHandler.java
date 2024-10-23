@@ -138,7 +138,8 @@ public class WebSocketHandler
 
 		else if ("reset board".equals(payload)) {
 
-			board = new Board(null, Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
+			board = new Board(null, 
+					Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
 					Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER),
 					Arrays.asList(Player.NO_PLAYER, Player.NO_PLAYER, Player.NO_PLAYER));
 

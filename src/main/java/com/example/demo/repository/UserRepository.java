@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,5 +14,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 	UserDetails findByLogin(String login);
 
 	User findByRoleAndIdNot(UserRole role, UUID userId);
+	
+	List<User> findAllByRole(UserRole role);
 
 }

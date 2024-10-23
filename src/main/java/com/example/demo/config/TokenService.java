@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.demo.entity.User;
+import com.example.demo.service.exception.TokenException;
 
 @Service
 public class TokenService {
@@ -21,26 +22,19 @@ public class TokenService {
 
 		try {
 			Algorithm algorithm = Algorithm.HMAC256(secret);
-			String token = JWT.create()
-					.withIssuer("auth-api")
-					.withSubject(user.getLogin())
-					.withExpiresAt(genExpirationDate())
-					.sign(algorithm);
+			String token = JWT.create().withIssuer("auth-api").withSubject(user.getLogin())
+					.withExpiresAt(genExpirationDate()).sign(algorithm);
 			return token;
 		} catch (Exception e) {
-			throw new RuntimeException("Error while generating token ", e);
+			throw new TokenException("Error while generating token " + e);
 		}
 	}
-	
+
 	public String validateToken(String token) {
 		try {
 			Algorithm algorithm = Algorithm.HMAC256(secret);
-			return JWT.require(algorithm)
-					.withIssuer("auth-api")
-					.build()
-					.verify(token)
-					.getSubject();
-			
+			return JWT.require(algorithm).withIssuer("auth-api").build().verify(token).getSubject();
+
 		} catch (Exception e) {
 			return "";
 		}

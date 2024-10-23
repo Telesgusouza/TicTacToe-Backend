@@ -41,6 +41,12 @@ public class UserController {
 
 		return ResponseEntity.ok().body(obj);
 	}
+	
+	@GetMapping("/id")
+	public ResponseEntity<ResponseIDUserDTO> getIdUser(@AuthenticationPrincipal User user) {
+		
+		return ResponseEntity.ok().body(new ResponseIDUserDTO(user.getId()));
+	}
 
 	@GetMapping("/id")
 	public ResponseEntity<ResponseIDUserDTO> getIdUser(@AuthenticationPrincipal User user) {
