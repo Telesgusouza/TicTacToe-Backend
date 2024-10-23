@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,9 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.RequestMatchScoreboardDTO;
 import com.example.demo.entity.Match;
-import com.example.demo.entity.User;
 import com.example.demo.service.MatchService;
-import com.example.demo.service.MatchmakingService;
 
 @RestController
 @RequestMapping("/api/v1/match")
@@ -29,27 +26,11 @@ public class MatchController {
 	@Autowired
 	private MatchService repo;
 
-	@Autowired
-	private MatchmakingService matchmakingService;
-
 	@GetMapping("/{id}")
 	public ResponseEntity<Match> getMatch(@PathVariable UUID id) {
 
 		Match match = this.repo.getMatch(id);
 		return ResponseEntity.ok().body(match);
-	}
-
-//	@PostMapping
-//	public ResponseEntity<Match> postMatch(@AuthenticationPrincipal User user) {
-//
-//		Match match = this.repo.createMatch(user);
-//		return ResponseEntity.ok().body(match);
-//	}
-
-	@PostMapping("/start")
-	public ResponseEntity<String> startMatchmaking(@AuthenticationPrincipal User user) {
-		matchmakingService.startMatchmaking(user);
-		return ResponseEntity.ok().body("Busca por partida iniciada");
 	}
 
 	@PostMapping("/{id}")

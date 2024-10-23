@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.RequestFriendsDTO;
+import com.example.demo.dto.ResponseIDUserDTO;
 import com.example.demo.dto.ResponseUser;
 import com.example.demo.entity.Friend;
 import com.example.demo.entity.User;
@@ -39,6 +40,12 @@ public class UserController {
 				user.getNumberOfWins(), user.getNumberOfDefeats(), user.getNumberOfDraws());
 
 		return ResponseEntity.ok().body(obj);
+	}
+
+	@GetMapping("/id")
+	public ResponseEntity<ResponseIDUserDTO> getIdUser(@AuthenticationPrincipal User user) {
+
+		return ResponseEntity.ok().body(new ResponseIDUserDTO(user.getId()));
 	}
 
 	@GetMapping("/{id}")
