@@ -23,6 +23,7 @@ import com.example.demo.enums.Player;
 import com.example.demo.enums.UserRole;
 import com.example.demo.repository.FriendsRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.exception.AccountException;
 
 @Service
 public class AuthorizationService implements UserDetailsService {
@@ -46,6 +47,7 @@ public class AuthorizationService implements UserDetailsService {
 	}
 
 	public ResponseTokenDTO login(RequestAuthDTO data) {
+		
 		var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
 		var auth = authenticationManager.authenticate(usernamePassword);
 
@@ -55,12 +57,17 @@ public class AuthorizationService implements UserDetailsService {
 	}
 
 	public ResponseTokenDTO register(RequestRegisterDTO data) {
-		if (this.repo.findByLogin(data.login()) != null)
-			throw new RuntimeException("account already exists");
+		if (this.repo.findByLogin(data.login()) != null) {
+
+			throw new AccountException("account already exists");
+		}
 
 		String encryptPassword = new BCryptPasswordEncoder().encode(data.password());
-		User newUser = new User(null, data.name(), data.login(), encryptPassword, UserRole.OUT_OF_START,
-				Player.PLAYER_ONE, 0, 0, 0); //
+		User newUser = new User(null, data.name(), data.login(), encryptPassword,
+
+				UserRole.OUT_OF_START, Player.NO_PLAYER,
+
+				0, 0, 0); //
 
 		User user = this.repo.save(newUser);
 		var token = tokenService.generateToken(user);

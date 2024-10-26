@@ -48,12 +48,6 @@ public class FileController {
 		return s3Service.getPhoto(id);
 	}
 
-	@GetMapping("/{id}")
-	public ResponseUrlPhotoDTO getPhoto(@PathVariable UUID id) {
-
-		return s3Service.getPhoto(id);
-	}
-
 	@GetMapping
 	public ResponseUrlPhotoDTO getPhoto(@AuthenticationPrincipal User user) {
 

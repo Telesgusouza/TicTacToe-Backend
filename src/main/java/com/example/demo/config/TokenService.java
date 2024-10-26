@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.demo.entity.User;
-import com.example.demo.service.exception.TokenException;
+import com.example.demo.service.exception.AccountException;
 
 @Service
 public class TokenService {
 
-	@Value("${api.security.token.secret}")
+	@Value("${JWT_SECRET:my-secret-key}")
 	private String secret;
 
 	public String generateToken(User user) {
@@ -26,7 +26,8 @@ public class TokenService {
 					.withExpiresAt(genExpirationDate()).sign(algorithm);
 			return token;
 		} catch (Exception e) {
-			throw new TokenException("Error while generating token " + e);
+			
+			throw new AccountException("Error while generating token " + e);
 		}
 	}
 
