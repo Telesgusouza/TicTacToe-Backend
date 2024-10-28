@@ -8,12 +8,15 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.example.demo.service.exception.AccountException;
+import com.example.demo.service.exception.FileException;
+import com.example.demo.service.exception.FileTypeException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class ResourceExceptionHandler {
 
+	// Authentication
 	@ExceptionHandler(AccountException.class)
 	public ResponseEntity<StandardError> handleAccountException(AccountException e, HttpServletRequest request) {
 
@@ -24,7 +27,6 @@ public class ResourceExceptionHandler {
 		return ResponseEntity.status(status).body(err);
 	}
 
-	// AuthenticationException
 	@ExceptionHandler(AuthenticationException.class)
 	public ResponseEntity<StandardError> handleAuthenticationException(AuthenticationException e,
 			HttpServletRequest request) {
@@ -35,5 +37,45 @@ public class ResourceExceptionHandler {
 
 		return ResponseEntity.status(status).body(err);
 	}
+	
+	@ExceptionHandler(FileTypeException.class)
+	public ResponseEntity<StandardError> handleFileTypeException(FileTypeException e, HttpServletRequest request) {
+		
+		String error = "invalid type";
+		Integer status = 400;
+		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
+		
+		return ResponseEntity.status(status).body(err);
+	}
+	
+	@ExceptionHandler(FileException.class)
+	public ResponseEntity<StandardError> handleFileException(FileException e, HttpServletRequest request) {
+		
+		String error = "unexpected error with file";
+		Integer status = 400;
+		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
+		
+		return ResponseEntity.status(status).body(err);
+	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

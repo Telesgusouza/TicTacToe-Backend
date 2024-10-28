@@ -14,6 +14,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.example.demo.dto.MetadataResponseDTO;
 import com.example.demo.dto.ResponseUrlPhotoDTO;
 import com.example.demo.dto.ResultResponseDTO;
+import com.example.demo.service.exception.FileTypeException;
 
 @Service
 public class S3Service {
@@ -34,21 +35,21 @@ public class S3Service {
 			MetadataResponseDTO metadataResponse = new MetadataResponseDTO("400", "invalid field", "0");
 			ResultResponseDTO response = new ResultResponseDTO(metadataResponse, null);
 
-			throw new RuntimeException("invalid typé file");
+			throw new FileTypeException("invalid type file");
 		}
 
 		if (file == null || file.isEmpty()) {
 			MetadataResponseDTO metadadaResponse = new MetadataResponseDTO("400", "invalid field", "0");
 			ResultResponseDTO response = new ResultResponseDTO(metadadaResponse, null);
 
-			throw new RuntimeException("invalid field file");
+			throw new FileTypeException("invalid field file");
 		}
 
 		try {
 			File fileSave = convertMultiPartToFile(file);
 			s3Client.putObject(bucketName, "" + filename, fileSave);
 
-			MetadataResponseDTO metadaResponse = new MetadataResponseDTO("200", "file upload successfully in aws", "1");
+			MetadataResponseDTO metadaResponse = new MetadataResponseDTO("201", "file upload successfully in aws", "1");
 			ResultResponseDTO response = new ResultResponseDTO(metadaResponse, filename);
 
 			return response;
