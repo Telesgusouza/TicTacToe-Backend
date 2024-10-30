@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.example.demo.service.exception.AccountException;
 import com.example.demo.service.exception.FileException;
 import com.example.demo.service.exception.FileTypeException;
+import com.example.demo.service.exception.InvalidFieldException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -20,7 +21,7 @@ public class ResourceExceptionHandler {
 	@ExceptionHandler(AccountException.class)
 	public ResponseEntity<StandardError> handleAccountException(AccountException e, HttpServletRequest request) {
 
-		String error = "Erro na conta";
+		String error = "Account error";
 		Integer status = 400; // Bad Request
 		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
 
@@ -37,45 +38,36 @@ public class ResourceExceptionHandler {
 
 		return ResponseEntity.status(status).body(err);
 	}
-	
+
 	@ExceptionHandler(FileTypeException.class)
 	public ResponseEntity<StandardError> handleFileTypeException(FileTypeException e, HttpServletRequest request) {
-		
+
 		String error = "invalid type";
 		Integer status = 400;
 		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
-		
+
 		return ResponseEntity.status(status).body(err);
 	}
-	
+
 	@ExceptionHandler(FileException.class)
 	public ResponseEntity<StandardError> handleFileException(FileException e, HttpServletRequest request) {
-		
+
 		String error = "unexpected error with file";
 		Integer status = 400;
 		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
-		
+
+		return ResponseEntity.status(status).body(err);
+	}
+
+	@ExceptionHandler(InvalidFieldException.class)
+	public ResponseEntity<StandardError> handleInvalidFieldException(InvalidFieldException e,
+			HttpServletRequest request) {
+
+		String error = "unexpected error with a field";
+		Integer status = 400;
+		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
+
 		return ResponseEntity.status(status).body(err);
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

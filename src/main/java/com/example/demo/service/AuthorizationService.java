@@ -24,6 +24,7 @@ import com.example.demo.enums.UserRole;
 import com.example.demo.repository.FriendsRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.exception.AccountException;
+import com.example.demo.service.exception.InvalidFieldException;
 
 @Service
 public class AuthorizationService implements UserDetailsService {
@@ -47,19 +48,32 @@ public class AuthorizationService implements UserDetailsService {
 	}
 
 	public ResponseTokenDTO login(RequestAuthDTO data) {
-		
+
 		var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
-		var auth = authenticationManager.authenticate(usernamePassword);
 
-		var token = tokenService.generateToken((User) auth.getPrincipal());
+		try {
 
-		return new ResponseTokenDTO(token);
+			var auth = authenticationManager.authenticate(usernamePassword);
+
+			var token = tokenService.generateToken((User) auth.getPrincipal());
+
+			return new ResponseTokenDTO(token);
+
+		} catch (Exception e) {
+		
+			if (this.repo.findByLogin(data.login()) != null) {
+				throw new InvalidFieldException("incorrect password");
+			} else {
+				throw new AccountException("Authentication failed");
+			}
+
+		}
+
 	}
 
 	public ResponseTokenDTO register(RequestRegisterDTO data) {
 		if (this.repo.findByLogin(data.login()) != null) {
-
-			throw new AccountException("account already exists");
+			throw new InvalidFieldException("incorrect password");
 		}
 
 		String encryptPassword = new BCryptPasswordEncoder().encode(data.password());
@@ -67,7 +81,7 @@ public class AuthorizationService implements UserDetailsService {
 
 				UserRole.OUT_OF_START, Player.NO_PLAYER,
 
-				0, 0, 0); //
+				0, 0, 0);
 
 		User user = this.repo.save(newUser);
 		var token = tokenService.generateToken(user);
@@ -76,13 +90,13 @@ public class AuthorizationService implements UserDetailsService {
 	}
 
 	public User findById(UUID id) {
-		return repo.findById(id).orElseThrow(() -> new RuntimeException("No user found"));
+		return repo.findById(id).orElseThrow(() -> new AccountException("No user found"));
 	}
 
 	public Friend addToFriend(RequestFriendsDTO data, UUID id) {
 
 		Optional<User> user = this.repo.findById(id);
-		User field = user.orElseThrow(() -> new RuntimeException("user not found"));
+		User field = user.orElseThrow(() -> new AccountException("user not found"));
 
 		if (!field.getFriends().stream().anyMatch(f -> f.getIdPlayer().equals(data.anotherPlayer()))) {
 			Friend newFriend = new Friend(null, data.name(), data.img(), data.anotherPlayer());
@@ -95,8 +109,7 @@ public class AuthorizationService implements UserDetailsService {
 
 			return newFriend;
 		} else {
-			System.out.println("Amigo já existe na lista de amigos");
-			throw new RuntimeException("Friend already exists in the friends list");
+			throw new InvalidFieldException("Friend already exists in the friends list");
 		}
 
 	}

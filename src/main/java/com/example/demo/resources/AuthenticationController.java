@@ -31,33 +31,33 @@ public class AuthenticationController {
 	@Autowired
 	private AuthorizationService authorizationService;
 
-
 	@Operation(
 			summary = "log into account", 
 			description = "Resource to be able to log into our account", 
 			responses = {
-			
+
 					@ApiResponse(
 							responseCode = "200", 
 							description = "User logged in successfully", 
 							content = @Content(
-									mediaType = "application/json", 
-									schema = @Schema(
-											implementation = ResponseTokenDTO.class))),
-				
+								mediaType = "application/json", 
+								schema = @Schema(implementation = ResponseTokenDTO.class))),
+
 					@ApiResponse(
-							responseCode = "401",
-							description = "Error logging into account",
+							responseCode = "401", 
+							description = "Error logging into account", 
 							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(
-											implementation = StandardError.class)
-									)
-							)
-					
-				}
-					
-			)
+									mediaType = "application/json", 
+									schema = @Schema(implementation = StandardError.class))),
+
+					@ApiResponse(
+							responseCode = "400", 
+							description = "Error incorrect password", 
+							content = @Content(
+									mediaType = "application/json", 
+									schema = @Schema(implementation = StandardError.class))), }
+
+	)
 	@PostMapping("login")
 	public ResponseEntity<ResponseTokenDTO> login(@RequestBody @Valid RequestAuthDTO data) {
 
@@ -66,43 +66,30 @@ public class AuthenticationController {
 		return ResponseEntity.ok().body(response);
 	}
 
-
 	@Operation(
-			summary = "Create new user/player",
-			description = "Resource that registers our users in the db",
+			summary = "Create new user/player", 
+			description = "Resource that registers our users in the db", 
 			responses = {
-					@ApiResponse(
-							responseCode = "201",
-							description = "Success in registering user",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(
-											implementation = ResponseTokenDTO.class
-											)
-									)
-							),
-					
-					@ApiResponse(
-							responseCode = "401",
-							description = "Account already exists",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(
-											implementation = StandardError.class)
-									)
-							),
-					
-					@ApiResponse(
-							responseCode = "401",
-							description = "Error while generating token",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(
-											implementation = StandardError.class)
-									)
-							),
-			}
-			)
+				@ApiResponse(
+						responseCode = "201", 
+						description = "Success in registering user", 
+						content = @Content(
+								mediaType = "application/json", 
+								schema = @Schema(implementation = ResponseTokenDTO.class))),
+	
+				@ApiResponse(
+						responseCode = "401", 
+						description = "Account already exists", 
+						content = @Content(
+								mediaType = "application/json", 
+								schema = @Schema(implementation = StandardError.class))),
+	
+				@ApiResponse(
+						responseCode = "401", 
+						description = "Error while generating token", 
+						content = @Content(
+								mediaType = "application/json", 
+								schema = @Schema(implementation = StandardError.class))), })
 	@PostMapping("register")
 	public ResponseEntity<ResponseTokenDTO> register(@RequestBody @Valid RequestRegisterDTO data) {
 
