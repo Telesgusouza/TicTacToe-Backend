@@ -50,13 +50,13 @@ public class AuthorizationService implements UserDetailsService {
 	public ResponseTokenDTO login(RequestAuthDTO data) {
 
 		var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
-
+	
 		try {
 
 			var auth = authenticationManager.authenticate(usernamePassword);
 
 			var token = tokenService.generateToken((User) auth.getPrincipal());
-
+			
 			return new ResponseTokenDTO(token);
 
 		} catch (Exception e) {
@@ -72,6 +72,7 @@ public class AuthorizationService implements UserDetailsService {
 	}
 
 	public ResponseTokenDTO register(RequestRegisterDTO data) {
+		
 		if (this.repo.findByLogin(data.login()) != null) {
 			throw new InvalidFieldException("incorrect password");
 		}
