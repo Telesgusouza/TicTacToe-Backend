@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -56,7 +57,8 @@ public class User implements UserDetails {
 	private Integer numberOfDraws;
 
 	@OneToMany(mappedBy = "player_friend", fetch = FetchType.EAGER)
-	private List<Friend> friends = List.of();
+//	private List<Friend> friends = List.of();
+	private List<Friend> friends = new ArrayList<Friend>();
 
 	public User() {
 	}

@@ -83,6 +83,13 @@ public class AuthenticationController {
 						content = @Content(
 								mediaType = "application/json", 
 								schema = @Schema(implementation = StandardError.class))),
+				
+				@ApiResponse(
+						responseCode = "401", 
+						description = "Must have at least 6 characters and less than 50", 
+						content = @Content(
+								mediaType = "application/json", 
+								schema = @Schema(implementation = StandardError.class))),
 	
 				@ApiResponse(
 						responseCode = "401", 

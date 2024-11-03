@@ -50,17 +50,17 @@ public class AuthorizationService implements UserDetailsService {
 	public ResponseTokenDTO login(RequestAuthDTO data) {
 
 		var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
-	
+
 		try {
 
 			var auth = authenticationManager.authenticate(usernamePassword);
 
 			var token = tokenService.generateToken((User) auth.getPrincipal());
-			
+
 			return new ResponseTokenDTO(token);
 
 		} catch (Exception e) {
-		
+
 			if (this.repo.findByLogin(data.login()) != null) {
 				throw new InvalidFieldException("incorrect password");
 			} else {
@@ -72,9 +72,12 @@ public class AuthorizationService implements UserDetailsService {
 	}
 
 	public ResponseTokenDTO register(RequestRegisterDTO data) {
-		
+
 		if (this.repo.findByLogin(data.login()) != null) {
-			throw new InvalidFieldException("incorrect password");
+			throw new InvalidFieldException("account already exists");
+		}
+		if (data.password().length() < 6 || data.password().length() >= 50) {
+			throw new InvalidFieldException("must have at least 6 characters and less than 50");
 		}
 
 		String encryptPassword = new BCryptPasswordEncoder().encode(data.password());
@@ -93,13 +96,16 @@ public class AuthorizationService implements UserDetailsService {
 	public User findById(UUID id) {
 		return repo.findById(id).orElseThrow(() -> new AccountException("No user found"));
 	}
-
+	
 	public Friend addToFriend(RequestFriendsDTO data, UUID id) {
-
+					
 		Optional<User> user = this.repo.findById(id);
 		User field = user.orElseThrow(() -> new AccountException("user not found"));
+		
+		
 
 		if (!field.getFriends().stream().anyMatch(f -> f.getIdPlayer().equals(data.anotherPlayer()))) {
+			
 			Friend newFriend = new Friend(null, data.name(), data.img(), data.anotherPlayer());
 			newFriend.setPlayer_friend(field);
 
