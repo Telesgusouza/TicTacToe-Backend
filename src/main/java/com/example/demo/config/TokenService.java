@@ -26,7 +26,6 @@ public class TokenService {
 					.withExpiresAt(genExpirationDate()).sign(algorithm);
 			return token;
 		} catch (Exception e) {
-			
 			throw new AccountException("Error while generating token " + e);
 		}
 	}

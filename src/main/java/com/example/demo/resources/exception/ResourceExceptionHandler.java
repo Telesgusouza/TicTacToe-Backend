@@ -6,23 +6,35 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.demo.service.exception.AccountException;
 import com.example.demo.service.exception.FileException;
 import com.example.demo.service.exception.FileTypeException;
 import com.example.demo.service.exception.InvalidFieldException;
+import com.example.demo.service.exception.InvalidTokenException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class ResourceExceptionHandler {
-
+	
 	// Authentication
 	@ExceptionHandler(AccountException.class)
 	public ResponseEntity<StandardError> handleAccountException(AccountException e, HttpServletRequest request) {
 
 		String error = "Account error";
 		Integer status = 400; // Bad Request
+		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
+
+		return ResponseEntity.status(status).body(err);
+	}
+
+	@ExceptionHandler(NullPointerException.class)
+	public ResponseEntity<StandardError> NullPointerException(NullPointerException e, HttpServletRequest request) {
+
+		String error = "null pointer exception";
+		Integer status = 500;
 		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
 
 		return ResponseEntity.status(status).body(err);
@@ -65,6 +77,17 @@ public class ResourceExceptionHandler {
 
 		String error = "unexpected error with a field";
 		Integer status = 400;
+		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
+
+		return ResponseEntity.status(status).body(err);
+	}
+
+	@ExceptionHandler(InvalidTokenException.class)
+	public ResponseEntity<StandardError> handleInvalidTokenException(InvalidTokenException e,
+			HttpServletRequest request) {
+
+		String error = "An exception occurred with the token";
+		Integer status = 403; // forbiden
 		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
 
 		return ResponseEntity.status(status).body(err);

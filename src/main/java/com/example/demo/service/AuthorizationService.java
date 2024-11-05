@@ -101,8 +101,6 @@ public class AuthorizationService implements UserDetailsService {
 					
 		Optional<User> user = this.repo.findById(id);
 		User field = user.orElseThrow(() -> new AccountException("user not found"));
-		
-		
 
 		if (!field.getFriends().stream().anyMatch(f -> f.getIdPlayer().equals(data.anotherPlayer()))) {
 			

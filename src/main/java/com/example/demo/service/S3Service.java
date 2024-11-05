@@ -14,7 +14,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.example.demo.dto.MetadataResponseDTO;
 import com.example.demo.dto.ResponseUrlPhotoDTO;
 import com.example.demo.dto.ResultResponseDTO;
-import com.example.demo.service.exception.FileTypeException;
+import com.example.demo.service.exception.FileException;
 
 @Service
 public class S3Service {
@@ -32,20 +32,23 @@ public class S3Service {
 
 		String contentType = file.getContentType();
 		if (contentType == null || !isImage(contentType)) {
+
 			MetadataResponseDTO metadataResponse = new MetadataResponseDTO("400", "invalid field", "0");
 			ResultResponseDTO response = new ResultResponseDTO(metadataResponse, null);
 
-			throw new FileTypeException("invalid type file");
+			return response;
 		}
 
 		if (file == null || file.isEmpty()) {
+
 			MetadataResponseDTO metadadaResponse = new MetadataResponseDTO("400", "invalid field", "0");
 			ResultResponseDTO response = new ResultResponseDTO(metadadaResponse, null);
 
-			throw new FileTypeException("invalid field file");
+			return response;
 		}
 
 		try {
+
 			File fileSave = convertMultiPartToFile(file);
 			s3Client.putObject(bucketName, "" + filename, fileSave);
 
@@ -55,6 +58,9 @@ public class S3Service {
 			return response;
 
 		} catch (Exception e) {
+
+			System.out.println("Error during file upload: " + e);
+
 			MetadataResponseDTO metadataResponse = new MetadataResponseDTO("400", "failed to upload file in s3 bucket",
 					"0");
 			ResultResponseDTO response = new ResultResponseDTO(metadataResponse, null);
@@ -95,12 +101,14 @@ public class S3Service {
 	}
 
 	public ResponseUrlPhotoDTO getPhoto(UUID id) {
+
 		try {
 
 			return new ResponseUrlPhotoDTO("" + s3Client.getUrl(bucketName, "" + id));
 
 		} catch (Exception e) {
-			throw new RuntimeException("Error get photo", e);
+
+			throw new FileException("Error get photo" + e);
 		}
 	}
 

@@ -80,7 +80,6 @@ public class AuthorizationServiceTest {
 
 	}
 
-	// anotar amanhã
 	@Test
 	@DisplayName("Must throw exception on password, upon login")
 	public void incorrectPasswordLogin() {
