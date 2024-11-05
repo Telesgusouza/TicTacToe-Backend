@@ -14,6 +14,7 @@ import com.example.demo.enums.MatchScoreboardEnum;
 import com.example.demo.enums.UserRole;
 import com.example.demo.repository.MatchRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.exception.AccountException;
 import com.example.demo.service.exception.InvalidFieldException;
 import com.example.demo.service.exception.MatchException;
 
@@ -34,6 +35,9 @@ public class MatchService {
 
 		if (id == null) {
 			throw new InvalidFieldException("field cannot be null");
+		}
+		if (!matchRepository.findById(id).isPresent()) {
+			throw new InvalidFieldException("invalid id");
 		}
 
 		Optional<Match> matchOptional = matchRepository.findById(id);
@@ -95,6 +99,10 @@ public class MatchService {
 	}
 
 	private void addVictoryScore(UUID idPlayerOne, UUID idPlayerTwo) {
+		if (!userRepository.findById(idPlayerOne).isPresent() || !userRepository.findById(idPlayerTwo).isPresent()) {
+			throw new AccountException("User not found");
+		}
+
 		Optional<User> player = this.userRepository.findById(idPlayerOne);
 		User playerOne = player.orElseThrow();
 		playerOne.setNumberOfWins(playerOne.getNumberOfWins() + 1);

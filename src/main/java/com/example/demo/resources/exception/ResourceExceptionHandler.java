@@ -25,7 +25,7 @@ public class ResourceExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<StandardError> handleAccountException(AccountException e, HttpServletRequest request) {
 
 		String error = "Account error";
-		Integer status = 400; // Bad Request
+		Integer status = 403; // Bad Request
 		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
 
 		return ResponseEntity.status(status).body(err);
