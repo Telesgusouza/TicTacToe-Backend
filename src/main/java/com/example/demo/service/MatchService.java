@@ -14,6 +14,8 @@ import com.example.demo.enums.MatchScoreboardEnum;
 import com.example.demo.enums.UserRole;
 import com.example.demo.repository.MatchRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.exception.InvalidFieldException;
+import com.example.demo.service.exception.MatchException;
 
 @Service
 public class MatchService {
@@ -29,11 +31,28 @@ public class MatchService {
 	}
 
 	public Match getMatch(UUID id) {
-		return matchRepository.findById(id).orElseThrow(() -> new RuntimeException("match not found"));
+
+		if (id == null) {
+			throw new InvalidFieldException("field cannot be null");
+		}
+
+		Optional<Match> matchOptional = matchRepository.findById(id);
+		Match match = matchOptional.orElseThrow(() -> new MatchException("match not found"));
+
+		return match;
 	}
 
 	public Match modifyMatchScoreboard(UUID id, RequestMatchScoreboardDTO data) {
+
+		if (id == null || !matchRepository.findById(id).isPresent()) {
+			throw new InvalidFieldException("Invalid match ID");
+		}
+		if (data == null) {
+			throw new InvalidFieldException("Request data cannot be null");
+		}
+
 		Optional<Match> requestMatch = this.matchRepository.findById(id);
+
 		Match match = requestMatch.orElseThrow();
 
 		switch (data.victory()) {

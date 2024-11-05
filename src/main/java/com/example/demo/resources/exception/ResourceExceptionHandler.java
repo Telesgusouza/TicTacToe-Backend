@@ -6,7 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.example.demo.service.exception.AccountException;
 import com.example.demo.service.exception.FileException;
@@ -17,8 +18,8 @@ import com.example.demo.service.exception.InvalidTokenException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
-public class ResourceExceptionHandler {
-	
+public class ResourceExceptionHandler extends ResponseEntityExceptionHandler {
+
 	// Authentication
 	@ExceptionHandler(AccountException.class)
 	public ResponseEntity<StandardError> handleAccountException(AccountException e, HttpServletRequest request) {
@@ -93,4 +94,40 @@ public class ResourceExceptionHandler {
 		return ResponseEntity.status(status).body(err);
 	}
 
+	@ExceptionHandler(MultipartException.class)
+	public ResponseEntity<StandardError> handleMultipartException(MultipartException e, HttpServletRequest request) {
+		String error = "An exception occurred with the token";
+		Integer status = 400;
+		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
+
+		return ResponseEntity.status(status).body(err);
+	}
+
+	@ExceptionHandler(MatchException.class)
+	public ResponseEntity<StandardError> handleMatchException(MatchException e, HttpServletRequest request) {
+		String error = "An exception occurred with the match";
+		Integer status = 400;
+		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
+
+		return ResponseEntity.status(status).body(err);
+	}
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

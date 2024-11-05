@@ -21,8 +21,6 @@ import com.example.demo.service.MatchService;
 @CrossOrigin(origins = "*")
 public class MatchController {
 
-	// aqui criaremos as partidas porém precisaremos de um ticket para ter acesso
-
 	@Autowired
 	private MatchService repo;
 
