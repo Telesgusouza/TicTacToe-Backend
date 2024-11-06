@@ -38,8 +38,6 @@ import com.example.demo.service.exception.InvalidFieldException;
 
 		"api.security.token.secret=${JWT_SECRET:my-secret-key}",
 
-//        "spring.main.allow-bean-definition-overriding=true",
-
 })
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
@@ -97,42 +95,3 @@ public class TicketsServiceTest {
 	}
 
 }
-
-/*
- * 
- * surgiu um erro em um teste meu
- * 
- * @Test
- * 
- * @DisplayName("must throw exception when match is not found") public void
- * mustThrowExceptionWhenMatchIsNotFound() {
- * 
- * UUID nnExistentIdMatch = UUID.randomUUID();
- * when(matchRepository.findById(nnExistentIdMatch)).thenReturn(Optional.empty()
- * );
- * 
- * assertThrows(InvalidFieldException.class, null);
- * 
- * }
- * 
- * org.opentest4j.AssertionFailedError: Unexpected exception type thrown,
- * expected: <com.example.demo.service.exception.InvalidFieldException> but was:
- * <java.lang.NullPointerException> at
- * org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.
- * java:151) at
- * org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67) at
- * org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35) at
- * org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3115) at
- * com.example.demo.service.TicketsServiceTest.
- * mustThrowExceptionWhenMatchIsNotFound(TicketsServiceTest.java:104) at
- * java.base/java.lang.reflect.Method.invoke(Method.java:580) at
- * java.base/java.util.ArrayList.forEach(ArrayList.java:1596) at
- * java.base/java.util.ArrayList.forEach(ArrayList.java:1596) Caused by:
- * java.lang.NullPointerException: Cannot invoke
- * "org.junit.jupiter.api.function.Executable.execute()" because "executable" is
- * null at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
- * ... 6 more
- * 
- * 
- * 
- */

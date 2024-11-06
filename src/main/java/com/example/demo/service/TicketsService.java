@@ -25,7 +25,8 @@ public class TicketsService {
 
 		if (idMatch == null) {
 			throw new InvalidFieldException("missing id match");
-		} if(!matchRepository.findById(idMatch).isPresent()) {
+		}
+		if (!matchRepository.findById(idMatch).isPresent()) {
 			throw new InvalidFieldException("field cannot be null");
 		}
 
