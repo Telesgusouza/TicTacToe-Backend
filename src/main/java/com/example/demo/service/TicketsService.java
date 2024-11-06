@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Match;
 import com.example.demo.repository.MatchRepository;
+import com.example.demo.service.exception.InvalidFieldException;
 
 @Service
 public class TicketsService {
@@ -23,7 +24,9 @@ public class TicketsService {
 	public String buildAndSaveTicket(UUID idMatch) {
 
 		if (idMatch == null) {
-			throw new RuntimeException("missing id match");
+			throw new InvalidFieldException("missing id match");
+		} if(!matchRepository.findById(idMatch).isPresent()) {
+			throw new InvalidFieldException("field cannot be null");
 		}
 
 		String ticket = UUID.randomUUID().toString();
