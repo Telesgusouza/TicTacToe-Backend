@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import com.example.demo.config.TokenService;
 import com.example.demo.dto.RequestAuthDTO;
@@ -58,7 +59,7 @@ public class AuthorizationServiceTest {
 	private UserRepository userRepository;
 
 	@Mock
-	private TokenService tokenService; // Adicionado mock para TokenService
+	private TokenService tokenService;
 
 	@Mock
 	private FriendsRepository repoFriends;
@@ -69,14 +70,21 @@ public class AuthorizationServiceTest {
 	@Autowired
 	private AuthorizationService authService;
 
-	@Test
 	@DisplayName("Must connect our user")
 	public void mustLogIn() throws Exception {
 
-		RequestAuthDTO user = new RequestAuthDTO("django@gmail.com", "111111");
-		var auth = authService.login(user);
+		User user = new User(UUID.randomUUID(), "testName", "test@gmail.com", "password123", UserRole.OUT_OF_START,
+				Player.PLAYER_ONE, 0, 0, 0);
 
-		assertNotNull(user);
+		RequestAuthDTO userAuth = new RequestAuthDTO("test@gmail.com", "password123");
+		var usernamePassword = new UsernamePasswordAuthenticationToken(userAuth.login(), userAuth.password());
+
+		when(authenticationManager.authenticate(usernamePassword)).thenReturn(usernamePassword);
+		when(tokenService.generateToken(user)).thenReturn("token_123");
+
+		var auth = authService.login(userAuth);
+
+		assertNotNull(auth);
 
 	}
 
@@ -137,7 +145,6 @@ public class AuthorizationServiceTest {
 		RequestRegisterDTO request = new RequestRegisterDTO("test@example.com", "password123", "John Doe");
 		User expectedUser = new User(null, "John Doe", "test@example.com", "encrypted_password", UserRole.OUT_OF_START,
 				Player.NO_PLAYER, 0, 0, 0);
-		String mockToken = "";
 
 		when(userRepository.findByLogin(request.login())).thenReturn(expectedUser);
 
@@ -150,8 +157,6 @@ public class AuthorizationServiceTest {
 	public void passwordTooShort() {
 
 		RequestRegisterDTO request = new RequestRegisterDTO("test@gmail.com", "11111", "teste");
-		User expectedUser = new User(null, "test", "test@gmail.com", "password_incrept", UserRole.OUT_OF_START,
-				Player.PLAYER_ONE, 0, 0, 0);
 
 		when(userRepository.findByLogin(request.login())).thenReturn(null);
 
@@ -164,8 +169,6 @@ public class AuthorizationServiceTest {
 
 		RequestRegisterDTO request = new RequestRegisterDTO("test@gmail.com",
 				"1111111111111111111111111111111111111111111111111111", "teste");
-		User expectedUser = new User(null, "test", "test@gmail.com", "password_incrept", UserRole.OUT_OF_START,
-				Player.PLAYER_ONE, 0, 0, 0);
 
 		when(userRepository.findByLogin(request.login())).thenReturn(null);
 

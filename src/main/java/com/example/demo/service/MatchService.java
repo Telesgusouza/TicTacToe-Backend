@@ -37,7 +37,7 @@ public class MatchService {
 			throw new InvalidFieldException("field cannot be null");
 		}
 		if (!matchRepository.findById(id).isPresent()) {
-			throw new InvalidFieldException("invalid id");
+			throw new MatchException("invalid id");
 		}
 
 		Optional<Match> matchOptional = matchRepository.findById(id);

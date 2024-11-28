@@ -96,14 +96,14 @@ public class AuthorizationService implements UserDetailsService {
 	public User findById(UUID id) {
 		return repo.findById(id).orElseThrow(() -> new AccountException("No user found"));
 	}
-	
+
 	public Friend addToFriend(RequestFriendsDTO data, UUID id) {
-					
+
 		Optional<User> user = this.repo.findById(id);
 		User field = user.orElseThrow(() -> new AccountException("user not found"));
 
 		if (!field.getFriends().stream().anyMatch(f -> f.getIdPlayer().equals(data.anotherPlayer()))) {
-			
+
 			Friend newFriend = new Friend(null, data.name(), data.img(), data.anotherPlayer());
 			newFriend.setPlayer_friend(field);
 

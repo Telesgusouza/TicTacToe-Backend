@@ -1,5 +1,29 @@
 version: '3.3'
 services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mydb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   redis:
     image: redis:7.0.5-alpine
     restart: always
@@ -7,3 +31,7 @@ services:
       - 6379:6379
     environment:
       ALLOW_EMPTY_PASSWORD: "yes"
+      
+volumes:
+  pgdata:   
+      
