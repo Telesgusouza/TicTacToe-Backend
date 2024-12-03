@@ -82,25 +82,10 @@ public class FileController {
 		return s3Service.getPhoto(id);
 	}
 
-	@Operation(
-			summary = "find photo with login",
-			description = "bring user photo through login",
-			responses = {
-					@ApiResponse(
-							responseCode = "200",
-							description = "Success in bringing photo",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = ResponseUrlPhotoDTO.class))),
-					
-					@ApiResponse(
-							responseCode = "400",
-							description = "Error in bringing photo",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = StandardError.class)))
-			}
-			)
+	@Operation(summary = "find photo with login", description = "bring user photo through login", responses = {
+			@ApiResponse(responseCode = "200", description = "Success in bringing photo", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUrlPhotoDTO.class))),
+
+			@ApiResponse(responseCode = "400", description = "Error in bringing photo", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StandardError.class))) })
 	@GetMapping
 	public ResponseUrlPhotoDTO getPhoto(@AuthenticationPrincipal User user) {
 
@@ -109,19 +94,3 @@ public class FileController {
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
