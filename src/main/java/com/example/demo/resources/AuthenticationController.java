@@ -3,6 +3,7 @@ package com.example.demo.resources;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-//@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*")
 @Tag(name = "Authentication", description = "operations related to user registration and login")
 public class AuthenticationController {
 

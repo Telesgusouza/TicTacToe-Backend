@@ -98,6 +98,7 @@ public class MatchService {
 		return this.matchRepository.save(match);
 	}
 
+	
 	private void addVictoryScore(UUID idPlayerOne, UUID idPlayerTwo) {
 		if (!userRepository.findById(idPlayerOne).isPresent() || !userRepository.findById(idPlayerTwo).isPresent()) {
 			throw new AccountException("User not found");

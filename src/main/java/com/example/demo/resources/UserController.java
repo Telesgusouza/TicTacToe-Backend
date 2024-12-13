@@ -32,13 +32,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-@Tag(
-		name = "User",
-		description = "Contains operations to deal with user"
-		)
+@Tag(name = "User", description = "Contains operations to deal with user")
 @RestController
 @RequestMapping("/api/v1/user")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class UserController {
 
 	@Autowired
@@ -47,32 +44,17 @@ public class UserController {
 	@Autowired
 	private UserRepository repoUser;
 
-	@Operation(
-			summary = "get user ",
-			description = "bring user information",
-			responses = {
-					@ApiResponse(
-							responseCode = "200",
-							description = "success in bringing data",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = ResponseUser.class))),
-					
-					@ApiResponse(
-							responseCode = "400",
-							description = "error in bringing data",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = StandardError.class))),
-			}
-			)
+	@Operation(summary = "get user ", description = "bring user information", responses = {
+			@ApiResponse(responseCode = "200", description = "success in bringing data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUser.class))),
+
+			@ApiResponse(responseCode = "400", description = "error in bringing data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StandardError.class))), })
 	@GetMapping
 	public ResponseEntity<ResponseUser> getUser(@AuthenticationPrincipal User user) throws AccountException {
-				
+
 		if (user == null) {
 			throw new AccountException("account already exists");
 		}
-		
+
 		ResponseUser obj = new ResponseUser(user.getName(), user.getLogin(), user.getRole(), user.getPlayer(),
 
 				user.getNumberOfWins(), user.getNumberOfDefeats(), user.getNumberOfDraws());
@@ -80,90 +62,45 @@ public class UserController {
 		return ResponseEntity.ok().body(obj);
 	}
 
-	@Operation(
-			summary = "get id user",
-			description = "Bring the user id",
-			responses = {
-					@ApiResponse(
-							responseCode = "200",
-							description = "success in bringing id",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = ResponseIDUserDTO.class))),
-					
-					@ApiResponse(
-							responseCode = "400",
-							description = "Error in bringing id",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = StandardError.class))),
-			}
-			)
+	@Operation(summary = "get id user", description = "Bring the user id", responses = {
+			@ApiResponse(responseCode = "200", description = "success in bringing id", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseIDUserDTO.class))),
+
+			@ApiResponse(responseCode = "400", description = "Error in bringing id", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StandardError.class))), })
 	@GetMapping("/id")
 	public ResponseEntity<ResponseIDUserDTO> getIdUser(@AuthenticationPrincipal User user) throws AccountException {
 
 		if (user == null) {
 			throw new AccountException("account already exists");
 		}
-		
+
 		return ResponseEntity.ok().body(new ResponseIDUserDTO(user.getId()));
 	}
 
-	@Operation(
-			summary = "get user for id",
-			description = "Bring user data by id",
-			responses = {
-					@ApiResponse(
-							responseCode = "200",
-							description = "success in bringing data",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = ResponseUser.class))),
-					
-					@ApiResponse(
-							responseCode = "400",
-							description = "Error in bringing data",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = StandardError.class))),
-			}
-			)
+	@Operation(summary = "get user for id", description = "Bring user data by id", responses = {
+			@ApiResponse(responseCode = "200", description = "success in bringing data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUser.class))),
+
+			@ApiResponse(responseCode = "400", description = "Error in bringing data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StandardError.class))), })
 	@GetMapping("/{id}")
 	public ResponseEntity<ResponseUser> getUserForID(@PathVariable UUID id) throws AccountException {
 		User user = this.repo.findById(id);
-		
+
 		if (user == null) {
 			throw new AccountException("account already exists");
 		}
-		
+
 		ResponseUser player = new ResponseUser(user.getName(), user.getLogin(), user.getRole(), user.getPlayer(),
 				user.getNumberOfWins(), user.getNumberOfDefeats(), user.getNumberOfDraws());
 
 		return ResponseEntity.ok().body(player);
 	}
 
-	@Operation(
-			summary = "get List friends",
-			description = "Brings the user's friends list",
-			responses = {
-					@ApiResponse(
-							responseCode = "200",
-							description = "Success in bringing friends list",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = Friend.class))),
-					
-					@ApiResponse(
-							responseCode = "400",
-							description = "Error in bringing friends list",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = StandardError.class))),
-			}
-			)
+	@Operation(summary = "get List friends", description = "Brings the user's friends list", responses = {
+			@ApiResponse(responseCode = "200", description = "Success in bringing friends list", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Friend.class))),
+
+			@ApiResponse(responseCode = "400", description = "Error in bringing friends list", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StandardError.class))), })
 	@GetMapping("/list_friends")
 	public ResponseEntity<List<Friend>> getListFriends(@AuthenticationPrincipal User user) throws AccountException {
-		
+
 		if (user == null) {
 			throw new AccountException("account already exists");
 		}
@@ -171,28 +108,14 @@ public class UserController {
 		return ResponseEntity.ok().body(user.getFriends());
 	}
 
-	@Operation(
-			summary = "Add new friend",
-			description = "Add a new friend to the list",
-			responses = {
-					@ApiResponse(
-							responseCode = "200",
-							description = "Success in add new user",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = Friend.class))),
-					
-					@ApiResponse(
-							responseCode = "400",
-							description = "Error in add new user",
-							content = @Content(
-									mediaType = "application/json",
-									schema = @Schema(implementation = StandardError.class))),
-			}
-			)
+	@Operation(summary = "Add new friend", description = "Add a new friend to the list", responses = {
+			@ApiResponse(responseCode = "200", description = "Success in add new user", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Friend.class))),
+
+			@ApiResponse(responseCode = "400", description = "Error in add new user", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StandardError.class))), })
 	@PostMapping
-	public ResponseEntity<Friend> addToFriend(@Valid @RequestBody RequestFriendsDTO data, @AuthenticationPrincipal User user) {
-		
+	public ResponseEntity<Friend> addToFriend(@Valid @RequestBody RequestFriendsDTO data,
+			@AuthenticationPrincipal User user) {
+
 		Friend userSave = this.repo.addToFriend(data, user.getId());
 
 		return ResponseEntity.ok().body(userSave);
