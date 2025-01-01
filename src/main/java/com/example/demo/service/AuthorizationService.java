@@ -39,6 +39,9 @@ public class AuthorizationService implements UserDetailsService {
 	private FriendsRepository repoFriends;
 
 	@Autowired
+	private S3Service s3Service;
+
+	@Autowired
 	private TokenService tokenService;
 
 	@Override
@@ -117,6 +120,12 @@ public class AuthorizationService implements UserDetailsService {
 			throw new InvalidFieldException("Friend already exists in the friends list");
 		}
 
+	}
+
+	public void deleteAccount(User user) {
+
+		this.s3Service.delete(user.getId());
+		this.repo.delete(user);
 	}
 
 }

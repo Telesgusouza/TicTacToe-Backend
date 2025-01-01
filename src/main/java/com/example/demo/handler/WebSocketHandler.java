@@ -162,11 +162,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			sessions.remove(session.getId());
 			session.close();
 
-//			session.sendMessage(new TextMessage(msg));
-//			sessions.put(session.getId(), session);
-//			session.close();
-//			clearBoard();
-//			afterConnectionClosed(session, CloseStatus.NORMAL);
 		}
 
 		else {
@@ -261,7 +256,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			switch (movement.row()) {
 			case 0: {
 				if (board.getRows_1().get(column) != Player.NO_PLAYER) {
-					System.out.println("campo já preenchido");
 					return mapper.writeValueAsString("field already filled in");
 				}
 
@@ -272,7 +266,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			}
 			case 1: {
 				if (board.getRows_2().get(column) != Player.NO_PLAYER) {
-					System.out.println("campo já preenchido");
 					throw new RuntimeException("field already filled");
 				}
 
@@ -283,7 +276,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			}
 			case 2: {
 				if (board.getRows_3().get(column) != Player.NO_PLAYER) {
-					System.out.println("campo já preenchido");
 					throw new RuntimeException("field already filled");
 				}
 

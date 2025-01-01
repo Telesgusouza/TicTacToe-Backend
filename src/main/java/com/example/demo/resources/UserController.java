@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -120,5 +121,49 @@ public class UserController {
 
 		return ResponseEntity.ok().body(userSave);
 	}
+	
+	@Operation(
+			summary = "Delete user", 
+			description = "delete user from database", 
+			responses = {
+				@ApiResponse(
+						responseCode = "200", 
+						description = "Success in deleter account", 
+						content = @Content(
+								mediaType = "application/json", 
+								schema = @Schema(implementation = Void.class))),
+	
+				@ApiResponse(
+						responseCode = "400", 
+						description = "Error in deleter account", 
+						content = @Content(
+								mediaType = "application/json", 
+								schema = @Schema(implementation = StandardError.class))), })
+	
+	@DeleteMapping
+	public ResponseEntity<Friend> deleteAccount(@AuthenticationPrincipal User user) {
+		
+		this.repo.deleteAccount(user);
+		return ResponseEntity.noContent().build();
+	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

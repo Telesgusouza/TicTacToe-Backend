@@ -4,6 +4,7 @@ package com.example.demo.resources;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,9 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.RequestAuthDTO;
 import com.example.demo.dto.RequestRegisterDTO;
+import com.example.demo.dto.ResetPasswordDTO;
 import com.example.demo.dto.ResponseTokenDTO;
+import com.example.demo.dto.TicketDTO;
+import com.example.demo.entity.Mail;
+import com.example.demo.repository.EmailRepository;
 import com.example.demo.resources.exception.StandardError;
 import com.example.demo.service.AuthorizationService;
+import com.example.demo.service.EmailService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,6 +36,14 @@ public class AuthenticationController {
 
 	@Autowired
 	private AuthorizationService authorizationService;
+
+	// email
+	@Autowired
+	private EmailRepository emailRepository;
+
+	@Autowired
+	private EmailService emailService;
+	//
 
 	@Operation(summary = "log into account", description = "Resource to be able to log into our account", responses = {
 
@@ -62,6 +76,28 @@ public class AuthenticationController {
 		ResponseTokenDTO response = authorizationService.register(data);
 
 		return ResponseEntity.ok().body(response);
+	}
+
+	// teste com envio de email
+	@PostMapping("/email_reset_password")
+	public void emailResetPassword(@RequestBody Mail mail) {
+
+		this.emailService.emailResetPassword(mail);
+	}
+
+	@PostMapping("/verify_ticket")
+	public ResponseEntity<?> getTicket(@RequestBody TicketDTO ticket) {
+
+		this.emailService.verifyTicket(ticket.ticket());
+
+		return ResponseEntity.noContent().build();
+	}
+
+	@PatchMapping("/pass_password")
+	public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordDTO password) {
+
+		this.emailService.resetPassword(password);
+		return ResponseEntity.noContent().build();
 	}
 
 }
