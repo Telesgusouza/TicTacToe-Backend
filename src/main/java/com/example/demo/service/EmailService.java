@@ -82,6 +82,11 @@ public class EmailService implements EmailRepository {
 			throw new RuntimeException("missing id user");
 		}
 
+		try {
+			Optional.ofNullable(redisTemplate.opsForValue().getAndDelete(email));
+		} catch (RuntimeException e) {
+		}
+
 		String ticket = generateRandomString(6);
 		User user = (User) userRepository.findByLogin(email);
 		String userLogin = user.getLogin();
@@ -105,6 +110,7 @@ public class EmailService implements EmailRepository {
 
 	// veremos o ticket
 	public Optional<String> getViewTicket(String email) {
+
 		return Optional.ofNullable(redisTemplate.opsForValue().get(email));
 	}
 
@@ -137,6 +143,7 @@ public class EmailService implements EmailRepository {
 			user.setPassword(passwordEncript);
 			this.userRepository.save(user);
 
+			getResetByTicket(data.ticket());
 		} catch (RuntimeException e) {
 			new RuntimeException("An error occurred while saving user data");
 		}
