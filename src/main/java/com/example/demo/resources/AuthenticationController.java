@@ -78,13 +78,90 @@ public class AuthenticationController {
 		return ResponseEntity.ok().body(response);
 	}
 
-	// teste com envio de email
+	// emails // 
+	@Operation(
+			summary = "Send ticket by email",
+			description = "The ticket will be sent by email",
+			responses = {
+					@ApiResponse(
+							responseCode = "200",
+							description = "Email sent successfully",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = Void.class
+											))),
+					
+					@ApiResponse(
+							responseCode = "400",
+							description = "Invalid field",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = StandardError.class))),
+					
+					@ApiResponse(
+							responseCode = "400",
+							description = "Error creating or saving ticket",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = StandardError.class))),
+					
+					@ApiResponse(
+							responseCode = "400",
+							description = "failed to send email",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = StandardError.class))),
+					
+					@ApiResponse(
+							responseCode = "400",
+							description = "Unknown error sending email",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = StandardError.class)))
+					
+					
+			}
+			)
 	@PostMapping("/email_reset_password")
 	public void emailResetPassword(@RequestBody Mail mail) {
 
 		this.emailService.emailResetPassword(mail);
 	}
 
+	@Operation(
+			summary = "verify token",
+			description = "Checks whether the passed token is a valid token",
+			responses = {
+					@ApiResponse(
+							responseCode = "200",
+							description = "is a valid token",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = Void.class))),
+					
+					@ApiResponse(
+							responseCode = "400",
+							description = "token cannot be is null",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = StandardError.class))),
+					
+					@ApiResponse(
+							responseCode = "400",
+							description = "invalid ticket",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = StandardError.class)))
+					
+			})
 	@PostMapping("/verify_ticket")
 	public ResponseEntity<?> getTicket(@RequestBody TicketDTO ticket) {
 
@@ -93,6 +170,60 @@ public class AuthenticationController {
 		return ResponseEntity.noContent().build();
 	}
 
+	@Operation(
+			summary = "Change password",
+			description = "Function that will change the user's password",
+			responses = {
+					
+					@ApiResponse(
+							responseCode = "200",
+							description = "password changed successfully",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = Void.class))),
+					
+					@ApiResponse(
+							responseCode = "400",
+							description = "Password too short",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = StandardError.class))),
+					
+					@ApiResponse(
+							responseCode = "400",
+							description = "Password cannot be null",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = StandardError.class))),
+					
+					@ApiResponse(
+							responseCode = "400",
+							description = "token cannot be is null",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = StandardError.class))),
+					
+					@ApiResponse(
+							responseCode = "400",
+							description = "invalid ticket",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = StandardError.class))),
+					
+					@ApiResponse(
+							responseCode = "400",
+							description = "An error occurred while saving user data",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(
+											implementation = StandardError.class)))
+					
+			})
 	@PatchMapping("/pass_password")
 	public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordDTO password) {
 
@@ -101,3 +232,37 @@ public class AuthenticationController {
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

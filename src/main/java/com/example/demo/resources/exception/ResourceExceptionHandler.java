@@ -10,10 +10,12 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.example.demo.service.exception.AccountException;
+import com.example.demo.service.exception.EmailException;
 import com.example.demo.service.exception.FileException;
 import com.example.demo.service.exception.FileTypeException;
 import com.example.demo.service.exception.InvalidFieldException;
 import com.example.demo.service.exception.InvalidTokenException;
+import com.example.demo.service.exception.ResourceNotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -111,8 +113,41 @@ public class ResourceExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return ResponseEntity.status(status).body(err);
 	}
-	
+
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<StandardError> handleResourceNotFoundException(ResourceNotFoundException e,
+			HttpServletRequest request) {
+		String error = "Some resource was not found";
+		Integer status = 400;
+		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
+
+		return ResponseEntity.status(status).body(err);
+	}
+
+	@ExceptionHandler(EmailException.class)
+	public ResponseEntity<StandardError> handleEmailException(EmailException e, HttpServletRequest request) {
+		
+		String error = "Email-related errors";
+		Integer status = 400;
+		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
+		
+		return ResponseEntity.status(status).body(err);
+		
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

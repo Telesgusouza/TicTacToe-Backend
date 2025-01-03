@@ -20,6 +20,9 @@ import com.example.demo.entity.Mail;
 import com.example.demo.entity.User;
 import com.example.demo.repository.EmailRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.exception.EmailException;
+import com.example.demo.service.exception.InvalidFieldException;
+import com.example.demo.service.exception.ResourceNotFoundException;
 
 import jakarta.mail.internet.MimeMessage;
 
@@ -66,34 +69,40 @@ public class EmailService implements EmailRepository {
 
 			} catch (MessagingException e) {
 				e.printStackTrace();
+				throw new EmailException("failed to send email");
 			}
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
+			throw new ResourceNotFoundException("Unknown error sending email");
 		}
 
 	}
 
 	// criaremos o ticket
 	private String buildAndSaveTicket(String email) {
-
 		if (email == null) {
-			throw new RuntimeException("missing id user");
+			throw new InvalidFieldException("Email cannot be null");
 		}
 
 		try {
-			Optional.ofNullable(redisTemplate.opsForValue().getAndDelete(email));
+			// Obter o ticket anterior
+			String oldTicket = redisTemplate.opsForValue().getAndDelete(email);
+
+			// Gerar novo ticket
+			String newTicket = generateRandomString(6);
+
+			User user = (User) userRepository.findByLogin(email);
+			String userLogin = user.getLogin();
+
+			// Salvar novo ticket com tempo de expiração
+			redisTemplate.opsForValue().set(newTicket, userLogin, Duration.ofHours(2));
+
+			return newTicket;
 		} catch (RuntimeException e) {
+			e.printStackTrace();
+			throw new ResourceNotFoundException("Error creating or saving ticket");
 		}
-
-		String ticket = generateRandomString(6);
-		User user = (User) userRepository.findByLogin(email);
-		String userLogin = user.getLogin();
-
-		redisTemplate.opsForValue().set(ticket, userLogin, Duration.ofHours(2));
-
-		return ticket;
 	}
 
 	private static String generateRandomString(int length) {
@@ -117,11 +126,11 @@ public class EmailService implements EmailRepository {
 	public void verifyTicket(String ticket) {
 
 		if (ticket.length() <= 0) {
-			throw new RuntimeException("token cannot be is null");
+			throw new InvalidFieldException("token cannot be is null");
 		}
 
 		Optional<String> optionalTicket = Optional.ofNullable(redisTemplate.opsForValue().get(ticket));
-		optionalTicket.orElseThrow(() -> new RuntimeException("invalid ticket"));
+		optionalTicket.orElseThrow(() -> new ResourceNotFoundException("invalid ticket"));
 	}
 
 	// deletaremos o ticket
@@ -131,7 +140,11 @@ public class EmailService implements EmailRepository {
 
 	public void resetPassword(ResetPasswordDTO data) {
 		if (data.password().length() < 6) {
-			throw new RuntimeException("Password too short");
+			throw new InvalidFieldException("Password too short");
+		}
+
+		if (data.password() == null) {
+			throw new InvalidFieldException("Password cannot be null");
 		}
 
 		verifyTicket(data.ticket());
@@ -145,7 +158,9 @@ public class EmailService implements EmailRepository {
 
 			getResetByTicket(data.ticket());
 		} catch (RuntimeException e) {
-			new RuntimeException("An error occurred while saving user data");
+			e.printStackTrace();
+			;
+			new ResourceNotFoundException("An error occurred while saving user data");
 		}
 
 	}
