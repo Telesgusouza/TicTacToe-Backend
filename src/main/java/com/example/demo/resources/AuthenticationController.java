@@ -37,13 +37,8 @@ public class AuthenticationController {
 	@Autowired
 	private AuthorizationService authorizationService;
 
-	// email
-	@Autowired
-	private EmailRepository emailRepository;
-
 	@Autowired
 	private EmailService emailService;
-	//
 
 	@Operation(summary = "log into account", description = "Resource to be able to log into our account", responses = {
 

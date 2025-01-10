@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.messaging.MessagingException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,10 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.service.exception.EmailException;
 import com.example.demo.service.exception.InvalidFieldException;
 import com.example.demo.service.exception.ResourceNotFoundException;
+import com.example.demo.service.exception.TicketCreationException;
+import com.example.demo.service.exception.TicketException;
 
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 @Service
@@ -46,48 +48,40 @@ public class EmailService implements EmailRepository {
 	@Async
 	public void emailResetPassword(Mail mail) {
 
+		if (mail.getTo() == null || mail.getTo().isEmpty()) {
+			// deve cair nessa exceção
+			throw new InvalidFieldException("Email cannot be null or empty");
+		}
+
+		Context context = new Context();
+		String ticket = buildAndSaveTicket(mail.getTo());
+
+		context.setVariable("ticket", ticket);
+		String process = templateEngine.process("ResetPasswordUser", context);
+
+		MimeMessage message = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message);
+
 		try {
 
-			Context context = new Context();
-			String ticket = buildAndSaveTicket(mail.getTo());
+			helper.setSubject("Resetar senha");
+			helper.setFrom("gustavo.teles711@gmail.com");
+			helper.setText(process, true);
 
-			context.setVariable("ticket", ticket);
-			String process = templateEngine.process("ResetPasswordUser", context);
+			helper.setTo(mail.getTo());
 
-			MimeMessage message = mailSender.createMimeMessage();
-			MimeMessageHelper helper = new MimeMessageHelper(message);
+			mailSender.send(message);
 
-			try {
-
-				helper.setSubject("Resetar senha");
-				helper.setFrom("gustavo.teles711@gmail.com");
-				helper.setText(process, true);
-
-				helper.setTo(mail.getTo());
-
-				mailSender.send(message);
-
-			} catch (MessagingException e) {
-				e.printStackTrace();
-				throw new EmailException("failed to send email");
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ResourceNotFoundException("Unknown error sending email");
+		} catch (MessagingException e) {
+			throw new EmailException("failed to send email");
 		}
 
 	}
 
 	// criaremos o ticket
-	private String buildAndSaveTicket(String email) {
-		if (email == null) {
-			throw new InvalidFieldException("Email cannot be null");
-		}
+	public String buildAndSaveTicket(String email) {
 
 		try {
-			// Obter o ticket anterior
-			String oldTicket = redisTemplate.opsForValue().getAndDelete(email);
 
 			// Gerar novo ticket
 			String newTicket = generateRandomString(6);
@@ -101,7 +95,7 @@ public class EmailService implements EmailRepository {
 			return newTicket;
 		} catch (RuntimeException e) {
 			e.printStackTrace();
-			throw new ResourceNotFoundException("Error creating or saving ticket");
+			throw new TicketCreationException("Error creating or saving ticket");
 		}
 	}
 
@@ -125,8 +119,8 @@ public class EmailService implements EmailRepository {
 
 	public void verifyTicket(String ticket) {
 
-		if (ticket.length() <= 0) {
-			throw new InvalidFieldException("token cannot be is null");
+		if (ticket.length() <= 6) {
+			throw new TicketException("ticket cannot be is null");
 		}
 
 		Optional<String> optionalTicket = Optional.ofNullable(redisTemplate.opsForValue().get(ticket));
@@ -139,12 +133,8 @@ public class EmailService implements EmailRepository {
 	}
 
 	public void resetPassword(ResetPasswordDTO data) {
-		if (data.password().length() < 6) {
-			throw new InvalidFieldException("Password too short");
-		}
-
-		if (data.password() == null) {
-			throw new InvalidFieldException("Password cannot be null");
+		if (data.password().length() < 6 || data.password() == null) {
+			throw new InvalidFieldException("invalid password");
 		}
 
 		verifyTicket(data.ticket());
@@ -159,7 +149,6 @@ public class EmailService implements EmailRepository {
 			getResetByTicket(data.ticket());
 		} catch (RuntimeException e) {
 			e.printStackTrace();
-			;
 			new ResourceNotFoundException("An error occurred while saving user data");
 		}
 

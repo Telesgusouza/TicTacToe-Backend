@@ -16,6 +16,8 @@ import com.example.demo.service.exception.FileTypeException;
 import com.example.demo.service.exception.InvalidFieldException;
 import com.example.demo.service.exception.InvalidTokenException;
 import com.example.demo.service.exception.ResourceNotFoundException;
+import com.example.demo.service.exception.TicketCreationException;
+import com.example.demo.service.exception.TicketException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -126,43 +128,39 @@ public class ResourceExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(EmailException.class)
 	public ResponseEntity<StandardError> handleEmailException(EmailException e, HttpServletRequest request) {
-		
+
 		String error = "Email-related errors";
 		Integer status = 400;
 		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
-		
+
 		return ResponseEntity.status(status).body(err);
-		
+
 	}
+
+	@ExceptionHandler(TicketCreationException.class)
+	public ResponseEntity<StandardError> handleTicketCreationException(TicketCreationException e,
+			HttpServletRequest request) {
+
+		String error = "Error create ticket";
+		Integer status = 400;
+		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
+
+		return ResponseEntity.status(status).body(err);
+
+	} 
+	
+	
+	// TicketException
+	@ExceptionHandler(TicketException.class)
+	public ResponseEntity<StandardError> handleTicketException(TicketException e,
+			HttpServletRequest request) {
+
+		String error = "Error ticket";
+		Integer status = 400;
+		StandardError err = new StandardError(Instant.now(), status, error, e.getMessage(), request.getRequestURI());
+
+		return ResponseEntity.status(status).body(err);
+
+	} 
+	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
