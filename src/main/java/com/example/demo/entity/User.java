@@ -1,9 +1,7 @@
 package com.example.demo.entity;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -19,11 +17,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 
@@ -55,9 +51,6 @@ public class User implements UserDetails {
 	private Integer numberOfWins;
 	private Integer numberOfDefeats;
 	private Integer numberOfDraws;
-
-	@OneToMany(mappedBy = "player_friend", fetch = FetchType.EAGER)
-	private List<Friend> friends = new ArrayList<Friend>();
 
 	public User() {
 	}
@@ -171,19 +164,11 @@ public class User implements UserDetails {
 		this.name = name;
 	}
 
-	public List<Friend> getFriends() {
-		return friends;
-	}
-
-	public void setFriends(List<Friend> friends) {
-		this.friends = friends;
-	}
-
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", name=" + name + ", login=" + login + ", password=" + password + ", role=" + role
 				+ ", player=" + player + ", numberOfWins=" + numberOfWins + ", numberOfDefeats=" + numberOfDefeats
-				+ ", numberOfDraws=" + numberOfDraws + ", friends=" + friends + "]";
+				+ ", numberOfDraws=" + numberOfDraws + "]";
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package com.example.demo.service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +13,11 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.config.TokenService;
 import com.example.demo.dto.RequestAuthDTO;
-import com.example.demo.dto.RequestFriendsDTO;
 import com.example.demo.dto.RequestRegisterDTO;
 import com.example.demo.dto.ResponseTokenDTO;
-import com.example.demo.entity.Friend;
 import com.example.demo.entity.User;
 import com.example.demo.enums.Player;
 import com.example.demo.enums.UserRole;
-import com.example.demo.repository.FriendsRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.exception.AccountException;
 import com.example.demo.service.exception.InvalidFieldException;
@@ -34,9 +30,6 @@ public class AuthorizationService implements UserDetailsService {
 
 	@Autowired
 	private UserRepository repo;
-
-	@Autowired
-	private FriendsRepository repoFriends;
 
 	@Autowired
 	private S3Service s3Service;
@@ -98,28 +91,6 @@ public class AuthorizationService implements UserDetailsService {
 
 	public User findById(UUID id) {
 		return repo.findById(id).orElseThrow(() -> new AccountException("No user found"));
-	}
-
-	public Friend addToFriend(RequestFriendsDTO data, UUID id) {
-
-		Optional<User> user = this.repo.findById(id);
-		User field = user.orElseThrow(() -> new AccountException("user not found"));
-
-		if (!field.getFriends().stream().anyMatch(f -> f.getIdPlayer().equals(data.anotherPlayer()))) {
-
-			Friend newFriend = new Friend(null, data.name(), data.img(), data.anotherPlayer());
-			newFriend.setPlayer_friend(field);
-
-			field.getFriends().add(newFriend);
-
-			this.repoFriends.save(newFriend);
-			this.repo.save(field);
-
-			return newFriend;
-		} else {
-			throw new InvalidFieldException("Friend already exists in the friends list");
-		}
-
 	}
 
 	public void deleteAccount(User user) {

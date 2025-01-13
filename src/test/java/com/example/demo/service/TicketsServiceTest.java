@@ -59,17 +59,14 @@ public class TicketsServiceTest {
 	@DisplayName("must generate ticket")
 	public void mustGenerateTicket() {
 
-		// Arrange
 		UUID idMatch = UUID.randomUUID();
 		Match match = new Match(idMatch, LocalDateTime.now(), UUID.randomUUID(), UUID.randomUUID(), "", "", 0, 0, 0, 0);
 
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 		when(matchRepository.findById(any(UUID.class))).thenReturn(Optional.of(match));
 
-		// Act
 		String generatedTicket = ticketsService.buildAndSaveTicket(idMatch);
 
-		// Assert
 		assertNotNull(generatedTicket);
 		assertNotEquals("", generatedTicket);
 

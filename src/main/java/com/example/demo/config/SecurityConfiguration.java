@@ -26,10 +26,14 @@ public class SecurityConfiguration {
 		return httpSecurity.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
-						.requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
+						
+						// Authentication
+						.requestMatchers(HttpMethod.POST, "/api/v1/auth/*").permitAll()
+						.requestMatchers(HttpMethod.PATCH, "/api/v1/auth/pass_password").permitAll()
+						
 						.requestMatchers("/ws/**").authenticated()
-						.anyRequest().permitAll() 
+						
+						.anyRequest().authenticated() 
 						)
 				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
 				.build();

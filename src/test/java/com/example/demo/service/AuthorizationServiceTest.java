@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -25,14 +24,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 
 import com.example.demo.config.TokenService;
 import com.example.demo.dto.RequestAuthDTO;
-import com.example.demo.dto.RequestFriendsDTO;
 import com.example.demo.dto.RequestRegisterDTO;
 import com.example.demo.dto.ResponseTokenDTO;
-import com.example.demo.entity.Friend;
 import com.example.demo.entity.User;
 import com.example.demo.enums.Player;
 import com.example.demo.enums.UserRole;
-import com.example.demo.repository.FriendsRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.exception.AccountException;
 import com.example.demo.service.exception.InvalidFieldException;
@@ -61,9 +57,6 @@ public class AuthorizationServiceTest {
 	@Mock
 	private TokenService tokenService;
 
-	@Mock
-	private FriendsRepository repoFriends;
-
 	@InjectMocks
 	private AuthorizationService authorizationService;
 
@@ -91,14 +84,12 @@ public class AuthorizationServiceTest {
 	@Test
 	@DisplayName("Must throw exception on password, upon login")
 	public void incorrectPasswordLogin() {
-		// Arrange
-		User existingUser = new User(null, null, "django@gmail.com", "111111", null, null, null, null, null); // Senha
-																												// correta
+		User existingUser = new User(null, null, "django@gmail.com", "111111", null, null, null, null, null);
+
 		RequestAuthDTO inputUser = new RequestAuthDTO("django@gmail.com", "111112");
 
 		Mockito.when(userRepository.findByLogin(Mockito.eq("django@gmail.com"))).thenReturn(existingUser);
 
-		// Act & Assert
 		assertThrows(InvalidFieldException.class, () -> authorizationService.login(inputUser));
 	}
 
@@ -107,9 +98,8 @@ public class AuthorizationServiceTest {
 	public void authenticationFailed() {
 
 		RequestAuthDTO user = new RequestAuthDTO("django@gmail.com", "111112");
-		Mockito.when(userRepository.findByLogin(Mockito.eq("django@gmail.com"))).thenReturn(null); // Simula usuário não
-																									// encontrado
-		// Act & Assert
+		Mockito.when(userRepository.findByLogin(Mockito.eq("django@gmail.com"))).thenReturn(null);
+
 		assertThrows(AccountException.class, () -> authorizationService.login(user));
 	}
 
@@ -117,7 +107,6 @@ public class AuthorizationServiceTest {
 	@Test
 	@DisplayName("Success record")
 	public void RegisterSuccess() throws Exception {
-		// Arrange
 		RequestRegisterDTO request = new RequestRegisterDTO("test@example.com", "password123", "John Doe");
 
 		User expectedUser = new User(null, "John Doe", "test@example.com", "encrypted_password", UserRole.OUT_OF_START,
@@ -128,10 +117,8 @@ public class AuthorizationServiceTest {
 		when(userRepository.save(any(User.class))).thenReturn(expectedUser);
 		when(tokenService.generateToken(any(User.class))).thenReturn(mockToken);
 
-		// Act
 		ResponseTokenDTO result = authorizationService.register(request);
 
-		// Assert
 		assertNotNull(result);
 		assertEquals(mockToken, result.token());
 
@@ -173,58 +160,6 @@ public class AuthorizationServiceTest {
 		when(userRepository.findByLogin(request.login())).thenReturn(null);
 
 		assertThrows(InvalidFieldException.class, () -> authorizationService.register(request));
-	}
-
-	@Test
-	@DisplayName("Must add a new friend to the friends list")
-	public void deveAdicionarNovoAmigo() {
-
-		// Criando objetos com IDs válidos
-		UUID userId = UUID.randomUUID();
-		UUID friendId = UUID.randomUUID();
-
-		RequestFriendsDTO friend = new RequestFriendsDTO("teste", "http://img.com/photo", friendId);
-		Friend entityFriend = new Friend(userId, "teste", "http://image", friendId);
-
-		User expectedUser = new User(userId, "test", "test@gmail.com", "password123", UserRole.OUT_OF_START,
-				Player.PLAYER_ONE, 0, 0, 0);
-
-		Optional<User> expectedUserOptional = Optional.of(expectedUser);
-
-		// Configurando os mocks
-		when(userRepository.findById(userId)).thenReturn(expectedUserOptional);
-		when(repoFriends.save(any(Friend.class))).thenReturn(entityFriend);
-		when(userRepository.save(any(User.class))).thenReturn(expectedUser);
-
-		// Executando o método sob teste
-		Friend addFriend = authorizationService.addToFriend(friend, userId);
-
-		assertNotNull(addFriend);
-		assertEquals(friendId, addFriend.getIdPlayer());
-	}
-
-	@Test
-	@DisplayName("Already part of your friends list")
-	public void friendAlreadyExists() {
-
-		// Criando objetos com IDs válidos
-		UUID userId = UUID.randomUUID();
-		UUID friendId = UUID.randomUUID();
-
-		RequestFriendsDTO friend = new RequestFriendsDTO("teste", "http://img.com/photo", friendId);
-		Friend entityFriend = new Friend(userId, "teste", "http://image", friendId);
-
-		User expectedUser = new User(userId, "test", "test@gmail.com", "password123", UserRole.OUT_OF_START,
-				Player.PLAYER_ONE, 0, 0, 0);
-
-		expectedUser.getFriends().add(entityFriend);
-
-		Optional<User> expectedUserOptional = Optional.of(expectedUser);
-
-		when(userRepository.findById(userId)).thenReturn(expectedUserOptional);
-
-		assertThrows(InvalidFieldException.class, () -> authorizationService.addToFriend(friend, userId));
-
 	}
 
 }
