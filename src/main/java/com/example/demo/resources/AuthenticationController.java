@@ -29,7 +29,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = "https://nimble-swan-c8809e.netlify.app")
+//@CrossOrigin(origins = "https://nimble-swan-c8809e.netlify.app")
 @Tag(name = "Authentication", description = "operations related to user registration and login")
 public class AuthenticationController {
 
