@@ -7,7 +7,6 @@ import javax.security.auth.login.AccountException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +27,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "User", description = "Contains operations to deal with user")
 @RestController
 @RequestMapping("/api/v1/user")
-@CrossOrigin
 public class UserController {
 
 	@Autowired
